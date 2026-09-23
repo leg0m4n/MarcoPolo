@@ -1,0 +1,17 @@
+# environments and build trees (large, machine-specific, reproducible from README/FINDINGS)
+.venv/
+.venv-vllm/
+.venv-vllm26/
+vendor/
+
+# run outputs (published separately, per the plan's "publish every run")
+results/
+
+# local tool state
+.claude/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+.mp_report.json
+.env

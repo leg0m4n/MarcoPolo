@@ -1,0 +1,19 @@
+# mini-swe-agent against locally-served North Mini Code (llama.cpp backend).
+#
+# Serving: scripts/serve_llamacpp.sh  (llama-server, OpenAI-compatible, :8101)
+# Why llama.cpp and not vLLM: see FINDINGS.md — vLLM's prebuilt wheels need a
+# CUDA 13 driver (>=580); this box runs 550.120.
+#
+# NOTE ON max_tokens: North Mini Code emits reasoning before content. A tight
+# completion budget returns EMPTY content with finish_reason="length", which a
+# harness scores as a model failure. Richer feedback rungs produce longer
+# reasoning, so a fixed low budget would truncate high rungs more often and
+# manufacture a rung effect. Keep this generous and log finish_reason.
+model:
+  model_name: "openai/north-mini-code"
+  model_kwargs:
+    api_base: "http://127.0.0.1:8101/v1"
+    api_key: "sk-noop"
+    temperature: 1.0     # Cohere's own eval settings, per the research plan
+    top_p: 0.95
+    max_tokens: 4096

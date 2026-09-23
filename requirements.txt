@@ -1,0 +1,9 @@
+# Harness and analysis environment (.venv, Python 3.11).
+# The vLLM serving environment is separate and built from source; see FINDINGS.md.
+mini-swe-agent==2.4.6
+datasets>=3.0
+huggingface_hub>=0.30
+hf_transfer>=0.1
+pytest>=8.0
+pytest-json-report>=1.5
+coverage>=7.0

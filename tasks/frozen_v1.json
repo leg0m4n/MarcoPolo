@@ -1,0 +1,286 @@
+{
+  "dataset": "princeton-nlp/SWE-bench_Verified",
+  "n": 40,
+  "tasks": [
+    {
+      "instance_id": "astropy__astropy-13398",
+      "repo": "astropy/astropy",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 4,
+      "created_at": "2022-06-24"
+    },
+    {
+      "instance_id": "astropy__astropy-13977",
+      "repo": "astropy/astropy",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 20,
+      "created_at": "2022-11-01"
+    },
+    {
+      "instance_id": "astropy__astropy-14369",
+      "repo": "astropy/astropy",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 3,
+      "created_at": "2023-02-06"
+    },
+    {
+      "instance_id": "astropy__astropy-14539",
+      "repo": "astropy/astropy",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "created_at": "2023-03-16"
+    },
+    {
+      "instance_id": "django__django-11206",
+      "repo": "django/django",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "created_at": "2019-04-13"
+    },
+    {
+      "instance_id": "django__django-11820",
+      "repo": "django/django",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "created_at": "2019-09-26"
+    },
+    {
+      "instance_id": "django__django-12276",
+      "repo": "django/django",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "created_at": "2020-01-05"
+    },
+    {
+      "instance_id": "django__django-14011",
+      "repo": "django/django",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 17,
+      "created_at": "2021-02-15"
+    },
+    {
+      "instance_id": "django__django-15252",
+      "repo": "django/django",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "created_at": "2021-12-28"
+    },
+    {
+      "instance_id": "django__django-16560",
+      "repo": "django/django",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 8,
+      "created_at": "2023-02-16"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-20676",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "created_at": "2021-07-19"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-21568",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 4,
+      "created_at": "2021-11-08"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-22865",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 3,
+      "created_at": "2022-04-20"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-24026",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "created_at": "2022-09-28"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25479",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "created_at": "2023-03-16"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25775",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 7,
+      "created_at": "2023-04-26"
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3069",
+      "repo": "mwaskom/seaborn",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "created_at": "2022-10-09"
+    },
+    {
+      "instance_id": "psf__requests-1724",
+      "repo": "psf/requests",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 6,
+      "created_at": "2013-11-04"
+    },
+    {
+      "instance_id": "psf__requests-1921",
+      "repo": "psf/requests",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 6,
+      "created_at": "2014-02-14"
+    },
+    {
+      "instance_id": "pydata__xarray-4075",
+      "repo": "pydata/xarray",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "created_at": "2020-05-18"
+    },
+    {
+      "instance_id": "pydata__xarray-4356",
+      "repo": "pydata/xarray",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 8,
+      "created_at": "2020-08-19"
+    },
+    {
+      "instance_id": "pydata__xarray-4966",
+      "repo": "pydata/xarray",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 4,
+      "created_at": "2021-02-26"
+    },
+    {
+      "instance_id": "pydata__xarray-6744",
+      "repo": "pydata/xarray",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 3,
+      "created_at": "2022-07-02"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-4551",
+      "repo": "pylint-dev/pylint",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 10,
+      "created_at": "2021-06-07"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-4604",
+      "repo": "pylint-dev/pylint",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 21,
+      "created_at": "2021-06-22"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-6528",
+      "repo": "pylint-dev/pylint",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 4,
+      "created_at": "2022-05-06"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-7205",
+      "repo": "pytest-dev/pytest",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 10,
+      "created_at": "2020-05-09"
+    },
+    {
+      "instance_id": "pytest-dev__pytest-7521",
+      "repo": "pytest-dev/pytest",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "created_at": "2020-07-20"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-13142",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "created_at": "2019-02-12"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-25102",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 2,
+      "created_at": "2022-12-02"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-11510",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 2,
+      "created_at": "2023-07-24"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-7462",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "created_at": "2020-04-12"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-7985",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "created_at": "2020-07-19"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8621",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "created_at": "2020-12-30"
+    },
+    {
+      "instance_id": "sympy__sympy-14531",
+      "repo": "sympy/sympy",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "created_at": "2018-03-18"
+    },
+    {
+      "instance_id": "sympy__sympy-15809",
+      "repo": "sympy/sympy",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "created_at": "2019-01-20"
+    },
+    {
+      "instance_id": "sympy__sympy-17139",
+      "repo": "sympy/sympy",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "created_at": "2019-07-01"
+    },
+    {
+      "instance_id": "sympy__sympy-17655",
+      "repo": "sympy/sympy",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "created_at": "2019-09-25"
+    },
+    {
+      "instance_id": "sympy__sympy-19783",
+      "repo": "sympy/sympy",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "created_at": "2020-07-16"
+    },
+    {
+      "instance_id": "sympy__sympy-22080",
+      "repo": "sympy/sympy",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 3,
+      "created_at": "2021-09-12"
+    }
+  ]
+}
