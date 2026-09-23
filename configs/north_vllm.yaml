@@ -1,0 +1,23 @@
+# mini-swe-agent against the official North Mini Code w4a16 checkpoint on vLLM.
+# This is the configuration every reported number uses.
+#
+# Serving: scripts/serve_north.sh  (vLLM, :8100, 64K context)
+# Requires: PYTHONPATH=src  (for marcopolo.models)
+#
+# model_class is load-bearing. Stock LitellmModel silently drops the model's
+# reasoning between turns on vLLM (see src/marcopolo/models.py, FINDINGS.md).
+#
+# max_tokens: North Mini Code reasons before answering, so a tight budget
+# returns empty content with finish_reason="length" — and richer rungs reason
+# longer, so they would truncate more. Keep generous; log finish_reason.
+model:
+  model_class: "marcopolo.models.NorthVLLMModel"
+  model_name: "openai/CohereLabs/North-Mini-Code-1.0-w4a16"
+  # local model: no price entry in litellm. The plan measures tokens, not dollars.
+  cost_tracking: "ignore_errors"
+  model_kwargs:
+    api_base: "http://127.0.0.1:8100/v1"
+    api_key: "sk-noop"
+    temperature: 1.0     # Cohere's own eval settings, per the research plan
+    top_p: 0.95
+    max_tokens: 8192

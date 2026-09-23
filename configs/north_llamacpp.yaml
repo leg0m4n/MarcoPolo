@@ -11,6 +11,8 @@
 # manufacture a rung effect. Keep this generous and log finish_reason.
 model:
   model_name: "openai/north-mini-code"
+  # local model: no price entry in litellm. The plan measures tokens, not dollars.
+  cost_tracking: "ignore_errors"
   model_kwargs:
     api_base: "http://127.0.0.1:8101/v1"
     api_key: "sk-noop"

@@ -219,3 +219,44 @@ The 32K limit above was a sizing artifact, not a hard limit.
 **Risk:** ~0.5 GiB headroom. Other tenants' GPU usage drifted from 1.1 to
 2.0 GiB in a day. Startup will fail if they grow further, and a serve that
 dies mid-run must be detected and the affected runs re-queued, not scored.
+
+---
+
+# Reasoning was silently dropped between turns (2026-09-23)
+
+The plan's page-8 warning — verify that "thinking passes between steps" — found
+a real defect in the stock harness.
+
+    vLLM returns reasoning as             `reasoning`
+    litellm renames it to                 `reasoning_content`
+    mini-swe-agent sends it back as       `reasoning_content`
+    vLLM's server discards incoming       `reasoning_content`
+
+The chat template itself accepts `reasoning`, `reasoning_content` and
+`thinking`. The loss happens in vLLM's request handling, before the template.
+Verified deterministically with vLLM's `/tokenize` + `/detokenize` endpoints on
+a real two-turn history:
+
+| Model class | Prior reasoning reaches next prompt | Prompt tokens |
+|---|---|---|
+| stock `LitellmModel` | **no** | 325 |
+| `marcopolo.models.NorthVLLMModel` | **yes** | 563 |
+
+**Stock mini-swe-agent + litellm + vLLM discards North Mini Code's reasoning at
+every step**, with no error. The model card requires it be kept; the plan notes
+dropping it forces replanning and would sandbag the model. Any run with the
+stock class would have under-reported capability.
+
+Fix: `NorthVLLMModel` renames the key back before each request. Selected via
+`model_class` in `configs/north_vllm.yaml`; covered by `tests/test_models.py`.
+
+## Also found while verifying
+
+- mini-swe-agent prices every call; a local model has no litellm price entry
+  and the run crashes. `cost_tracking: "ignore_errors"` in both configs — the
+  plan measures tokens, not dollars.
+- When the model replies in prose instead of a tool call, mini-swe-agent raises
+  `FormatError` and sends back a correction. That is correct, but these
+  round-trips cost turns and tokens and must count toward *turns to first pass*
+  and *tokens per fix*. A prose "fixed it" without submitting is also the
+  pattern the *false-success* metric exists to catch.
