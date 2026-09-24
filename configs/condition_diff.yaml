@@ -1,0 +1,3 @@
+# Feedback condition: `check` reports at rung 'diff' (see src/marcopolo/rungs.py).
+marcopolo:
+  rung: diff

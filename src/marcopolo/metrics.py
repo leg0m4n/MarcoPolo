@@ -21,6 +21,9 @@ Per policy, three numbers:
 
 An empty patch scores f2p 0 and breaks nothing; the evaluator skips it and
 writes no report, so those values are filled in here.
+
+Both policies score source files only: test-file changes are stripped first and
+kept for the tampering audit (see patches.py).
 """
 from __future__ import annotations
 
@@ -60,11 +63,16 @@ def score_run(run_dir: Path, instance_id: str, n_fail_to_pass: int) -> dict:
     submitted = bool(info.get("submission"))
 
     sub = count_tests(find_report(run_dir, "submitted", instance_id), n_fail_to_pass)
-    # A submitted patch IS the final state: the agent submits `git diff` and stops.
-    final = sub if submitted else count_tests(find_report(run_dir, "final", instance_id), n_fail_to_pass)
+    # The agent chooses which files go into its submitted patch, so the final
+    # repository state can differ even when it submits. run_one.sh evaluates the
+    # final state separately unless both make the same change.
+    policy = run_dir / "final_policy.json"
+    same = json.loads(policy.read_text()).get("final_equals_submitted", False) if policy.exists() else False
+    final = sub if same else count_tests(find_report(run_dir, "final", instance_id), n_fail_to_pass)
 
     row = {
         "instance_id": instance_id,
+        "final_equals_submitted": same,
         "exit_status": info.get("exit_status"),
         "submitted": submitted,
         "turns": len(traj.turns),

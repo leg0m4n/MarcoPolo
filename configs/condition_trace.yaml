@@ -1,0 +1,3 @@
+# Feedback condition: `check` reports at rung 'trace' (see src/marcopolo/rungs.py).
+marcopolo:
+  rung: trace

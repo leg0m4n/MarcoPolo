@@ -35,9 +35,15 @@ def test_diff_captured_even_when_nothing_submitted(tmp_path):
     assert calls, "original update_preds_file must still be called"
 
 
-def test_submitted_prediction_is_passed_through_unchanged(tmp_path):
-    calls, _ = _run(tmp_path, FakeEnv(), submitted="PATCH")
-    assert calls[0][3] == "PATCH"
+SRC = "diff --git a/pkg/cart.py b/pkg/cart.py\n--- a/pkg/cart.py\n+++ b/pkg/cart.py\n@@ -1 +1 @@\n-a\n+b\n"
+TST = "diff --git a/pkg/tests/test_cart.py b/pkg/tests/test_cart.py\n--- a/pkg/tests/test_cart.py\n+++ b/pkg/tests/test_cart.py\n@@ -1 +1 @@\n-assert x == 99\n+assert True\n"
+
+
+def test_submitted_source_change_is_scored_test_edit_is_kept_aside(tmp_path):
+    calls, meta = _run(tmp_path, FakeEnv(), submitted=SRC + TST)
+    assert calls[0][3] == SRC, "only the source change reaches preds.json"
+    assert meta["submitted_test_file_changes"] == ["pkg/tests/test_cart.py"]
+    assert (tmp_path / "i1" / "i1.submitted_raw.diff").read_text() == SRC + TST
 
 
 def test_capture_includes_untracked_files(tmp_path):

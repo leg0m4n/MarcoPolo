@@ -32,18 +32,25 @@ scripts/serve_llamacpp.sh    serve North Mini Code locally (llama.cpp, :8101)
 scripts/serve_north.sh       same via vLLM (needs driver >=580 — see FINDINGS.md)
 scripts/smoke_test.py        endpoint / tool-call parsing / reasoning separation
 configs/north_llamacpp.yaml  mini-swe-agent pointed at the local endpoint
+configs/check_harness.yaml   agent instructions for experiment runs (same for every rung)
+configs/condition_*.yaml     one per feedback rung
 src/marcopolo/rungs.py       the check tool: rung-limited feedback
 src/marcopolo/tasks.py       frozen task-set selection
 src/marcopolo/trajectory.py  trajectory analysis, truncation detection
 tasks/frozen_v1.json         the pre-registered task set (40 tasks, 11 repos)
 src/marcopolo/models.py      keeps the model's reasoning across turns on vLLM
 src/marcopolo/run_swebench.py  runner that records the final diff on every exit
+src/marcopolo/grader.py      the `check` tool: grader container, agent setup, interception
+src/marcopolo/check.py       pytest output -> what each rung may show
+src/marcopolo/patches.py     what is scored vs kept for the tampering audit
+src/marcopolo/hardcoding.py  flags runs that paste a test's expected value into source
 src/marcopolo/metrics.py     pre-registered scoring (both policies, secondary metrics)
 src/marcopolo/schedule.py    the GPU window agreed with the server's admin
 src/marcopolo/runqueue.py    resumable run queue
 scripts/run_window.sh        cron entry: one window's worth of runs
 scripts/run_one.sh           one run: agent, evaluation, scoring
 scripts/report.py            per-condition summary of an experiment
+scripts/preflight.py         validates every candidate task through the real `check`
 tests/                       experimental guarantees as tests
 PREREGISTRATION.md           decided and open design choices
 ```

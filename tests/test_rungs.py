@@ -103,3 +103,11 @@ def test_deltas_flag_healthy_task():
     d = rung_deltas(_failing(), Path("/repo"))
     assert d["trace_adds_over_diff"] is True
     assert d["padded_matches_trace"] is True
+
+
+def test_padding_makes_no_claim_about_the_run():
+    """Filler must be neutral: no counts, no outcomes, nothing to contradict rung 1."""
+    import re
+    body = render(_failing(), "padded", Path("/repo"))
+    filler = body.split("\n", 1)[1]
+    assert not re.search(r"\d+ (items|tests?|passed|failed)|no tests ran|error", filler, re.I)

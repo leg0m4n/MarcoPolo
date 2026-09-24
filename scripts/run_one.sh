@@ -17,7 +17,12 @@ docker image inspect "$IMG" >/dev/null 2>&1 || {
   docker pull -q "$IMG" >/dev/null || { echo "PULL FAILED $IID"; exit 2; }
   echo "$IMG" >> "results/$EXP/pulled_images"; }
 
-EXTRA=(); [ -f "configs/condition_${COND}.yaml" ] && EXTRA=(-c "configs/condition_${COND}.yaml")
+# experiment conditions add the check-aware template and their rung; "native" adds nothing
+EXTRA=()
+if [ "$COND" != native ]; then
+  [ -f "configs/condition_${COND}.yaml" ] || { echo "UNKNOWN CONDITION $COND"; exit 5; }
+  EXTRA=(-c configs/check_harness.yaml -c "configs/condition_${COND}.yaml")
+fi
 t0=$(date +%s)
 $PY -m marcopolo.run_swebench --subset "$DS" --split test --filter "^${IID}\$" -o "$RUN" -w 1 \
     -c swebench.yaml -c configs/north_vllm.yaml -c configs/pilot_env.yaml "${EXTRA[@]}" >"$RUN/agent.log" 2>&1
@@ -29,10 +34,18 @@ if ! up; then echo "INVALID $RUN_ID: vLLM died during the run"; exit 3; fi
 # primary policy: the submitted patch
 ( cd "$RUN" && $PY -m swebench.harness.run_evaluation -d "$DS" -s test -i "$IID" \
     -p preds.json -id submitted --max_workers 1 >eval_submitted.log 2>&1 )
-# secondary policy: final repository state, only needed when nothing was submitted
+# secondary policy: final repository state. Evaluated separately unless it makes
+# the same change as the submitted patch (the agent picks which files it submits).
 FINAL="$RUN/$IID/$IID.final.diff"
-if ! $PY -c "import json,sys;sys.exit(0 if json.load(open('$RUN/preds.json'))['$IID'].get('model_patch') else 1)" \
-   && [ -s "$FINAL" ]; then
+SAME=$($PY -c "
+import json, sys; sys.path.insert(0, 'src')
+from marcopolo.patches import same_changes
+sub = json.load(open('$RUN/preds.json'))['$IID'].get('model_patch') or ''
+fin = open('$FINAL').read() if __import__('os').path.exists('$FINAL') else ''
+same = same_changes(sub, fin)
+json.dump({'final_equals_submitted': same, 'final_empty': not fin.strip()}, open('$RUN/final_policy.json', 'w'))
+print('1' if same else '0')")
+if [ "$SAME" = 0 ] && [ -s "$FINAL" ]; then
   $PY -c "import json;json.dump({'$IID':{'instance_id':'$IID','model_name_or_path':'final-state','model_patch':open('$FINAL').read()}},open('$RUN/final_preds.json','w'))"
   ( cd "$RUN" && $PY -m swebench.harness.run_evaluation -d "$DS" -s test -i "$IID" \
       -p final_preds.json -id final --max_workers 1 >eval_final.log 2>&1 )

@@ -1,0 +1,420 @@
+{
+  "source": "SWE-bench/SWE-bench_Verified",
+  "filter": "pytest-based repos (excl. django, sympy, pytest-dev); difficulty < 4h; >= 2 FAIL_TO_PASS",
+  "tasks": [
+    {
+      "instance_id": "astropy__astropy-12907",
+      "repo": "astropy/astropy",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 13,
+      "image": "swebench/sweb.eval.x86_64.astropy_1776_astropy-12907:latest",
+      "created_at": "2022-03-03"
+    },
+    {
+      "instance_id": "astropy__astropy-13236",
+      "repo": "astropy/astropy",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 644,
+      "image": "swebench/sweb.eval.x86_64.astropy_1776_astropy-13236:latest",
+      "created_at": "2022-05-09"
+    },
+    {
+      "instance_id": "astropy__astropy-13398",
+      "repo": "astropy/astropy",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 4,
+      "n_pass_to_pass": 68,
+      "image": "swebench/sweb.eval.x86_64.astropy_1776_astropy-13398:latest",
+      "created_at": "2022-06-24"
+    },
+    {
+      "instance_id": "astropy__astropy-13977",
+      "repo": "astropy/astropy",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 20,
+      "n_pass_to_pass": 322,
+      "image": "swebench/sweb.eval.x86_64.astropy_1776_astropy-13977:latest",
+      "created_at": "2022-11-01"
+    },
+    {
+      "instance_id": "astropy__astropy-14369",
+      "repo": "astropy/astropy",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 3,
+      "n_pass_to_pass": 732,
+      "image": "swebench/sweb.eval.x86_64.astropy_1776_astropy-14369:latest",
+      "created_at": "2023-02-06"
+    },
+    {
+      "instance_id": "astropy__astropy-14539",
+      "repo": "astropy/astropy",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 46,
+      "image": "swebench/sweb.eval.x86_64.astropy_1776_astropy-14539:latest",
+      "created_at": "2023-03-16"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-20676",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 32,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-20676:latest",
+      "created_at": "2021-07-19"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-21568",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 4,
+      "n_pass_to_pass": 73,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-21568:latest",
+      "created_at": "2021-11-08"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-22865",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 3,
+      "n_pass_to_pass": 57,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-22865:latest",
+      "created_at": "2022-04-20"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-24026",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 764,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-24026:latest",
+      "created_at": "2022-09-28"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-24570",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 267,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-24570:latest",
+      "created_at": "2022-11-30"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25122",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 12,
+      "n_pass_to_pass": 2476,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-25122:latest",
+      "created_at": "2023-02-01"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25287",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 786,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-25287:latest",
+      "created_at": "2023-02-22"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25479",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 263,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-25479:latest",
+      "created_at": "2023-03-16"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25775",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 7,
+      "n_pass_to_pass": 89,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-25775:latest",
+      "created_at": "2023-04-26"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-26208",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 813,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-26208:latest",
+      "created_at": "2023-06-28"
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3069",
+      "repo": "mwaskom/seaborn",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 94,
+      "image": "swebench/sweb.eval.x86_64.mwaskom_1776_seaborn-3069:latest",
+      "created_at": "2022-10-09"
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3187",
+      "repo": "mwaskom/seaborn",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 248,
+      "image": "swebench/sweb.eval.x86_64.mwaskom_1776_seaborn-3187:latest",
+      "created_at": "2022-12-18"
+    },
+    {
+      "instance_id": "psf__requests-1724",
+      "repo": "psf/requests",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 6,
+      "n_pass_to_pass": 79,
+      "image": "swebench/sweb.eval.x86_64.psf_1776_requests-1724:latest",
+      "created_at": "2013-11-04"
+    },
+    {
+      "instance_id": "psf__requests-1766",
+      "repo": "psf/requests",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 6,
+      "n_pass_to_pass": 79,
+      "image": "swebench/sweb.eval.x86_64.psf_1776_requests-1766:latest",
+      "created_at": "2013-11-29"
+    },
+    {
+      "instance_id": "psf__requests-1921",
+      "repo": "psf/requests",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 6,
+      "n_pass_to_pass": 107,
+      "image": "swebench/sweb.eval.x86_64.psf_1776_requests-1921:latest",
+      "created_at": "2014-02-14"
+    },
+    {
+      "instance_id": "psf__requests-2317",
+      "repo": "psf/requests",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 8,
+      "n_pass_to_pass": 133,
+      "image": "swebench/sweb.eval.x86_64.psf_1776_requests-2317:latest",
+      "created_at": "2014-11-01"
+    },
+    {
+      "instance_id": "psf__requests-6028",
+      "repo": "psf/requests",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 185,
+      "image": "swebench/sweb.eval.x86_64.psf_1776_requests-6028:latest",
+      "created_at": "2022-01-04"
+    },
+    {
+      "instance_id": "pydata__xarray-3993",
+      "repo": "pydata/xarray",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 2398,
+      "image": "swebench/sweb.eval.x86_64.pydata_1776_xarray-3993:latest",
+      "created_at": "2020-04-21"
+    },
+    {
+      "instance_id": "pydata__xarray-4075",
+      "repo": "pydata/xarray",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 958,
+      "image": "swebench/sweb.eval.x86_64.pydata_1776_xarray-4075:latest",
+      "created_at": "2020-05-18"
+    },
+    {
+      "instance_id": "pydata__xarray-4356",
+      "repo": "pydata/xarray",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 8,
+      "n_pass_to_pass": 604,
+      "image": "swebench/sweb.eval.x86_64.pydata_1776_xarray-4356:latest",
+      "created_at": "2020-08-19"
+    },
+    {
+      "instance_id": "pydata__xarray-4966",
+      "repo": "pydata/xarray",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 4,
+      "n_pass_to_pass": 21,
+      "image": "swebench/sweb.eval.x86_64.pydata_1776_xarray-4966:latest",
+      "created_at": "2021-02-26"
+    },
+    {
+      "instance_id": "pydata__xarray-6744",
+      "repo": "pydata/xarray",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 3,
+      "n_pass_to_pass": 1815,
+      "image": "swebench/sweb.eval.x86_64.pydata_1776_xarray-6744:latest",
+      "created_at": "2022-07-02"
+    },
+    {
+      "instance_id": "pydata__xarray-7393",
+      "repo": "pydata/xarray",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 71,
+      "image": "swebench/sweb.eval.x86_64.pydata_1776_xarray-7393:latest",
+      "created_at": "2022-12-20"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-4551",
+      "repo": "pylint-dev/pylint",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 10,
+      "n_pass_to_pass": 0,
+      "image": "swebench/sweb.eval.x86_64.pylint-dev_1776_pylint-4551:latest",
+      "created_at": "2021-06-07"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-4604",
+      "repo": "pylint-dev/pylint",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 21,
+      "n_pass_to_pass": 0,
+      "image": "swebench/sweb.eval.x86_64.pylint-dev_1776_pylint-4604:latest",
+      "created_at": "2021-06-22"
+    },
+    {
+      "instance_id": "pylint-dev__pylint-6528",
+      "repo": "pylint-dev/pylint",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 4,
+      "n_pass_to_pass": 171,
+      "image": "swebench/sweb.eval.x86_64.pylint-dev_1776_pylint-6528:latest",
+      "created_at": "2022-05-06"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-13142",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 54,
+      "image": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-13142:latest",
+      "created_at": "2019-02-12"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-13779",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 18,
+      "image": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-13779:latest",
+      "created_at": "2019-05-03"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-14087",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 3,
+      "n_pass_to_pass": 172,
+      "image": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-14087:latest",
+      "created_at": "2019-06-13"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-14983",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 105,
+      "image": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-14983:latest",
+      "created_at": "2019-09-14"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-25102",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 59,
+      "image": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-25102:latest",
+      "created_at": "2022-12-02"
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-26194",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 186,
+      "image": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-26194:latest",
+      "created_at": "2023-04-17"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-11445",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 8,
+      "image": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-11445:latest",
+      "created_at": "2023-05-28"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-11510",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 7,
+      "image": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-11510:latest",
+      "created_at": "2023-07-24"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-7462",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 49,
+      "image": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-7462:latest",
+      "created_at": "2020-04-12"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-7748",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 12,
+      "image": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-7748:latest",
+      "created_at": "2020-05-30"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-7985",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 3,
+      "image": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-7985:latest",
+      "created_at": "2020-07-19"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8593",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 1,
+      "image": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-8593:latest",
+      "created_at": "2020-12-27"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8621",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 31,
+      "image": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-8621:latest",
+      "created_at": "2020-12-30"
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-9461",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 3,
+      "n_pass_to_pass": 59,
+      "image": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-9461:latest",
+      "created_at": "2021-07-17"
+    }
+  ]
+}

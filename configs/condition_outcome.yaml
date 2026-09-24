@@ -1,0 +1,3 @@
+# Feedback condition: `check` reports at rung 'outcome' (see src/marcopolo/rungs.py).
+marcopolo:
+  rung: outcome

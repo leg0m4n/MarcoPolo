@@ -27,17 +27,17 @@ from pathlib import Path
 
 RUNGS = ("outcome", "location", "diff", "trace", "padded")
 
-# Deterministic filler for the `padded` control. Real-looking but carries no
-# information about the fault: it must not narrow the search space at all.
+# Deterministic filler for the `padded` control. It must be *neutral*, not just
+# fault-free: nothing in it may claim anything about the test run. An earlier
+# version included "no tests ran" and "collected N items", which contradict
+# "2 tests failed" and could mislead the agent, so the padded condition would
+# differ from rung 1 by more than length.
 _FILLER = [
-    "collecting ... collected {n} items",
+    "platform linux -- Python 3, pytest",
     "cachedir: .pytest_cache",
     "rootdir: {root}",
-    "plugins: json-report-1.5.0, metadata-3.1.1",
-    "platform linux -- Python 3.11.9, pytest-8.3.4, pluggy-1.5.0",
-    "configfile: pyproject.toml",
-    "test session starts",
-    "no tests ran in 0.00s" ,
+    "configfile: setup.cfg",
+    "plugins: none",
 ]
 
 
@@ -123,9 +123,19 @@ def _uncovered_lines(repo: Path) -> list[str]:
     return out
 
 
+MAX_LISTED = 20    # failing tests shown individually; the rest summarised
+MAX_VALUES = 12    # rung-4 values shown per failing test
+MAX_MESSAGE_LINES = 6   # lines of the error message (rungs 3 and 4 alike)
+
+
 def render(res: CheckResult, rung: str, repo: Path | None = None,
            seed: int = 0) -> str:
-    """Render a CheckResult at one rung. This is all the agent ever sees."""
+    """Render a CheckResult at one rung. This is all the agent ever sees.
+
+    Every rung shows at most MAX_LISTED failing tests individually, so an agent
+    that breaks hundreds of tests does not flood its context, and the cap is the
+    same for every rung.
+    """
     if rung not in RUNGS:
         raise ValueError(f"unknown rung {rung!r}; expected one of {RUNGS}")
 
@@ -133,43 +143,44 @@ def render(res: CheckResult, rung: str, repo: Path | None = None,
         return "All tests passed."
 
     n = res.failed + res.errors
+    head = f"{n} test{'s' if n != 1 else ''} failed."
 
     if rung == "outcome":
-        return f"{n} test{'s' if n != 1 else ''} failed."
+        return head
 
     if rung == "padded":
-        base = f"{n} test{'s' if n != 1 else ''} failed."
         target = len(render(res, "trace", repo))
-        return base + "\n" + _pad(target - len(base), repo, seed)
+        return head + "\n" + _pad(target - len(head) - 1, repo, seed)
+
+    shown = res.failures[:MAX_LISTED]
+    more = len(res.failures) - len(shown)
+    tail = [f"... and {more} more failing test{'s' if more != 1 else ''}"] if more > 0 else []
 
     if rung == "location":
-        names = "\n".join(f"{f['test']} failed" for f in res.failures)
-        return f"{n} failed:\n{names}"
+        return "\n".join([f"{n} failed:"] + [f"{f['test']} failed" for f in shown] + tail)
 
     lines = [f"{n} failed:"]
-    for f in res.failures:
+    for f in shown:
         loc = _rel(f.get("path"), repo)
-        loc = f"{loc}:{f['lineno']}" if loc else "?"
-        msg = f["message"].splitlines()[0] if f["message"] else ""
+        loc = f"{loc}:{f['lineno']}" if loc and f.get("lineno") else "?"
+        msg = [m for m in (f.get("message") or "").splitlines() if m.strip()][:MAX_MESSAGE_LINES]
         lines.append(f"{f['test']} failed at {loc}")
-        if msg:
-            lines.append(f"  {msg}")
-
-    if rung == "diff":
-        return "\n".join(lines)
-
-    # rung == "trace"
-    probe = "\n".join(
-        _introspection_of(f.get("longrepr", "")) for f in res.failures).strip()
-    if probe:
-        lines.append("")
-        lines.append("Values at failure:")
-        lines.extend(f"  {ln}" for ln in probe.splitlines()[:25])
-    if res.uncovered:
+        lines.extend(f"  {m}" for m in msg)
+        if rung == "trace":
+            frames = f.get("frames") or []
+            values = f.get("values")
+            if values is None:        # CheckResult built by run_tests(): derive from longrepr
+                values = _introspection_of(f.get("longrepr", "")).splitlines()
+            if len(frames) > 1:
+                lines.append("  call path: " + " -> ".join(frames))
+            if values:
+                lines.append("  values at failure:")
+                lines.extend(f"    {v}" for v in values[:MAX_VALUES])
+    if rung == "trace" and res.uncovered:
         lines.append("")
         lines.append("Execution trace:")
         lines.extend(f"  {_rel_line(u, repo)}" for u in res.uncovered[:40])
-    return "\n".join(lines)
+    return "\n".join(lines + tail)
 
 
 def _rel(path: str | None, repo: Path | None) -> str:
@@ -233,7 +244,7 @@ def _pad(nchars: int, repo: Path | None, seed: int) -> str:
     out: list[str] = []
     total = 0
     while total < nchars:
-        line = rng.choice(_FILLER).format(n=rng.randint(2, 40), root=root)
+        line = rng.choice(_FILLER).format(root=root)
         out.append(line)
         total += len(line) + 1
     return "\n".join(out)[:nchars]
