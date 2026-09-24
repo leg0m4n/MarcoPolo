@@ -36,7 +36,16 @@ src/marcopolo/rungs.py       the check tool: rung-limited feedback
 src/marcopolo/tasks.py       frozen task-set selection
 src/marcopolo/trajectory.py  trajectory analysis, truncation detection
 tasks/frozen_v1.json         the pre-registered task set (40 tasks, 11 repos)
+src/marcopolo/models.py      keeps the model's reasoning across turns on vLLM
+src/marcopolo/run_swebench.py  runner that records the final diff on every exit
+src/marcopolo/metrics.py     pre-registered scoring (both policies, secondary metrics)
+src/marcopolo/schedule.py    the GPU window agreed with the server's admin
+src/marcopolo/runqueue.py    resumable run queue
+scripts/run_window.sh        cron entry: one window's worth of runs
+scripts/run_one.sh           one run: agent, evaluation, scoring
+scripts/report.py            per-condition summary of an experiment
 tests/                       experimental guarantees as tests
+PREREGISTRATION.md           decided and open design choices
 ```
 
 ## Running

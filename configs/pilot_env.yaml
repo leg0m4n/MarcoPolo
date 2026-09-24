@@ -1,0 +1,7 @@
+# Environment overrides for SWE-bench runs.
+environment:
+  # Zero network egress, per the plan's rigor checklist. SWE-bench images ship
+  # with dependencies pre-installed, so the agent needs no network.
+  run_args: ["--rm", "--network", "none"]
+  # Images are 1-4 GB; run_pilot.sh pre-pulls, this is a backstop.
+  pull_timeout: 1800

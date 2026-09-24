@@ -1,0 +1,7 @@
+# MarcoPolo — GPU window agreed with the server's admin:
+#   every night 23:00-08:00, plus all of Friday and Saturday.
+# Every 15 min: start or continue the active experiment if inside the window.
+# Outside the window, or with no results/ACTIVE_EXPERIMENT, this does nothing.
+*/15 * * * * /home/avocoral/Documents/MarcoPolo/scripts/run_window.sh >> /home/avocoral/Documents/MarcoPolo/results/cron.log 2>&1
+# Hard stop when a window closes (08:00 Sun-Thu). Normally already drained.
+0 8 * * 0-4 /home/avocoral/Documents/MarcoPolo/scripts/window_stop.sh >> /home/avocoral/Documents/MarcoPolo/results/cron.log 2>&1

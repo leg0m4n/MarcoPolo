@@ -260,3 +260,58 @@ Fix: `NorthVLLMModel` renames the key back before each request. Selected via
   round-trips cost turns and tokens and must count toward *turns to first pass*
   and *tokens per fix*. A prose "fixed it" without submitting is also the
   pattern the *false-success* metric exists to catch.
+
+---
+
+# Week-1 pilot: 5 tasks at native feedback (2026-09-23)
+
+`tasks/pilot_v1.json` (fixed before any run). vLLM w4a16, 64K context,
+`NorthVLLMModel`, mini-swe-agent SWE-bench template, `--network none`.
+
+| task | exit | resolved | target tests fixed | broke | turns | gen tokens | max/turn | min |
+|---|---|---|---|---|---|---|---|---|
+| pylint-dev__pylint-4551 (1-4 h) | context overflow | no | – | 0 | 70 | 23,092 | 2,201 | 18.6 |
+| matplotlib__matplotlib-21568 | context overflow | no | – | 0 | 91 | 26,336 | 2,030 | 22.2 |
+| astropy__astropy-13977 | submitted | no | 12/20 | 4 | 115 | 23,877 | 1,326 | 19.9 |
+| sympy__sympy-17655 (<15 min) | submitted | **yes** | 2/2 | 0 | 79 | 11,018 | 619 | 9.4 |
+| django__django-11820 (<15 min) | submitted | no | 1/2 | 0 | 113 | 32,528 | 1,918 | 25.3 |
+
+**1/5 resolved.** Wilson 95% interval 4–62%, so five tasks say little. But
+Cohere's reported 67.6% on SWE-bench Verified sits just outside it. Candidate
+causes, not yet separated: the 64K context cap, 4-bit quantization, the
+harness, and task selection (>= 2 failing tests; one 1-4 h task). The plan's
+full-precision calibration slice separates quantization. The context cap is a
+new suspect: 2 of 5 runs ended by filling it.
+
+## Measured
+
+- **Truncation: 0 turns** with `finish_reason == "length"`. The largest single
+  turn generated 2,201 tokens against 8,192 reserved. `max_tokens: 4096` is safe
+  and returns ~4K tokens of context to the history.
+- **Decode is ~90% of agent wall time.** Mean 94 turns and 23,370 generated
+  tokens per run. Prefix-cache hit rate 87%, so prompt processing is cheap.
+- **Partial progress is invisible to pass/fail.** astropy fixed 12/20 target
+  tests and broke 4; matplotlib's unsubmitted work deleted 1,125 lines of
+  `dates.py`. Both score as "not resolved".
+
+## Cost projection (plan's scale-up rule)
+
+| serving config | decode tok/s | per run | 720 runs |
+|---|---|---|---|
+| `--enforce-eager` | 22.7 | 19.5 min | 236 h (9.8 days) |
+| `--max-num-seqs 1` (batch-1 CUDA graphs) | 69.2 | 8.0 min | **97 h (4.1 days)** |
+
+Serial, one card. Includes evaluation (~27 s per run) and image pulls (~2 min
+per task, once each).
+
+## Harness defects found by the pilot
+
+1. **Lost diffs on overflow.** A run that ends without submitting loses every
+   edit when its container is deleted, so the plan's "log every diff" and the
+   tampering audit are blind on those runs. Fixed:
+   `python -m marcopolo.run_swebench` records the final diff on every exit.
+2. **Image cleanup.** mini-swe-agent leaves its container idling on
+   `sleep 2h` after an exception, holding the image. Cleanup failed silently on
+   the two overflowed runs (7.9 GB left behind). Fixed in `run_pilot.sh`.
+3. **Analysis tool bug.** `trajectory.py` counted North Mini Code's normal
+   tool-call turns (blank content) as empty. Fixed and tested.

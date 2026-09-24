@@ -31,6 +31,7 @@ class Turn:
     completion_tokens: int = 0
     content_chars: int = 0
     reasoning_chars: int = 0
+    n_tool_calls: int = 0
 
     @property
     def truncated(self) -> bool:
@@ -38,7 +39,12 @@ class Turn:
 
     @property
     def empty_content(self) -> bool:
-        return self.content_chars == 0
+        """No text AND no action: the turn produced nothing usable.
+
+        North Mini Code routinely leaves `content` blank on tool-call turns, so
+        blank content alone is normal and must not be counted.
+        """
+        return self.content_chars == 0 and self.n_tool_calls == 0
 
 
 @dataclass
@@ -86,6 +92,7 @@ def load(path: Path) -> Trajectory:
             content_chars=len(m.get("content") or ""),
             reasoning_chars=len(
                 m.get("reasoning") or m.get("reasoning_content") or ""),
+            n_tool_calls=len(m.get("tool_calls") or []),
         ))
         idx += 1
     return traj

@@ -1,0 +1,42 @@
+{
+  "purpose": "week-1 pilot at native feedback: measure tokens/run, turns, truncation, wall time",
+  "source": "tasks/frozen_v1.json",
+  "selection": "shuffle seed=1, 2/2/1 by difficulty, distinct repos",
+  "tasks": [
+    {
+      "instance_id": "pylint-dev__pylint-4551",
+      "repo": "pylint-dev/pylint",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 10,
+      "created_at": "2021-06-07"
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-21568",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 4,
+      "created_at": "2021-11-08"
+    },
+    {
+      "instance_id": "astropy__astropy-13977",
+      "repo": "astropy/astropy",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 20,
+      "created_at": "2022-11-01"
+    },
+    {
+      "instance_id": "sympy__sympy-17655",
+      "repo": "sympy/sympy",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "created_at": "2019-09-25"
+    },
+    {
+      "instance_id": "django__django-11820",
+      "repo": "django/django",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "created_at": "2019-09-26"
+    }
+  ]
+}
