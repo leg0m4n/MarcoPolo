@@ -1,0 +1,24 @@
+{
+  "purpose": "check smoke test: first runs of the model with `check`; not experiment data",
+  "selection": "first two tasks admitted by the pre-flight (preflight_v2)",
+  "tasks": [
+    {
+      "instance_id": "astropy__astropy-12907",
+      "repo": "astropy/astropy",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 13,
+      "image": "swebench/sweb.eval.x86_64.astropy_1776_astropy-12907:latest",
+      "created_at": "2022-03-03"
+    },
+    {
+      "instance_id": "astropy__astropy-13236",
+      "repo": "astropy/astropy",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 644,
+      "image": "swebench/sweb.eval.x86_64.astropy_1776_astropy-13236:latest",
+      "created_at": "2022-05-09"
+    }
+  ]
+}

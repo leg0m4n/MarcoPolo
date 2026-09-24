@@ -80,3 +80,25 @@ def test_expected_vs_actual_on_continuation_lines_reaches_rung_3():
     assert "y: array([False, False,  True,  True])" in f["message"]
     diff = render(parse(out, [nid]), "diff")
     assert "y: array(" in diff and "values at failure" not in diff
+
+
+def test_ids_with_spaces_match_the_datasets_truncated_ids():
+    """SWE-bench's ids are cut at the first space; so is its parser's output."""
+    from swebench.harness.log_parsers import PARSER_REGISTRY
+    out = (FX / "pytest_param_with_spaces.txt").read_text()
+    truncated = "test_spaces.py::test_non_mapping_init[ceci"     # as the dataset stores it
+    ok = "test_spaces.py::test_non_mapping_init[ok]"
+    # without the official parser the truncated id has no status at all; a
+    # PASSING test named with a space would then be counted as failing
+    assert parse(out, [truncated, ok]).failures[0]["status"] == "NOT RUN"
+    # parse_log_pytest truncates too, so exact match; parse_log_pytest_v2 (astropy,
+    # sphinx, scikit) keeps the full name, which only official grading's prefix
+    # resolution reconciles with the dataset's truncated id. Both must agree.
+    for parser in ("parse_log_pytest", "parse_log_astropy"):
+        r = parse(out, [truncated, ok], PARSER_REGISTRY[parser])
+        assert (r.passed, r.failed) == (1, 1), parser
+        assert r.failures[0]["status"] == "FAILED", parser
+    res = parse(out, [truncated, ok], PARSER_REGISTRY["parse_log_astropy"])
+    assert (res.passed, res.failed) == (1, 1)
+    f = res.failures[0]
+    assert f["status"] == "FAILED" and "ceci n'est pas un meta" in f["message"]

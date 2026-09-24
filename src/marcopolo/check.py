@@ -129,24 +129,54 @@ def _key(node_id: str) -> str:
     return node_id.split("::", 1)[1].replace("::", ".") if "::" in node_id else node_id
 
 
-def parse(output: str, relevant: list[str]) -> CheckResult:
-    """CheckResult over the task's tests only (FAIL_TO_PASS + PASS_TO_PASS)."""
-    st = statuses(output)
+def parse(output: str, relevant: list[str], status_parser=None) -> CheckResult:
+    """CheckResult over the task's tests only (FAIL_TO_PASS + PASS_TO_PASS).
+
+    status_parser: the official SWE-bench log parser for the task (the dataset's
+    `log_parser`). Pass it whenever available: it decides pass/fail exactly as
+    scoring will. It also truncates test ids at the first space — SWE-bench's
+    FAIL_TO_PASS/PASS_TO_PASS ids are truncated the same way — so matching
+    against the dataset's ids only works with the official parser.
+    """
+    own = statuses(output)
+    if status_parser is not None:
+        from swebench.harness.grading import _resolve_case
+        sm = status_parser(output, None)
+    else:
+        sm, _resolve_case = {k: v[0] for k, v in own.items()}, None
+
+    def resolve(nid):
+        """(status, full id) exactly as official grading resolves the dataset's id.
+
+        676 SWE-bench Verified ids are truncated mid-parameter (SWE-bench #290);
+        grading prefix-matches those when the candidates agree on pass/fail, and
+        treats ambiguous ones as not passing. We use the same function.
+        """
+        key = _resolve_case(nid, sm) if _resolve_case else (nid if nid in sm else None)
+        return (sm[key], key) if key else ("NOT RUN", nid)
     blocks = _sections(output)
     by_name = {}
     for header, body in blocks.items():
         name = re.sub(r"^ERROR at (setup|teardown) of ", "", header)
         by_name.setdefault(name, body)
+
+    def body_for(nid):
+        key = _key(nid)
+        if key in by_name:
+            return by_name[key]
+        # a dataset id truncated at a space: match the full name by prefix
+        return next((b for n, b in by_name.items() if n.startswith(key)), None)
     collect = {h[len("ERROR collecting "):].strip(): b for h, b in blocks.items() if h.startswith("ERROR collecting ")}
 
     res = CheckResult()
     for nid in relevant:
-        status, short = st.get(nid, ("NOT RUN", ""))
+        status, full = resolve(nid)
+        short = own.get(full, ("", ""))[1]
         if status in PASS:
             res.passed += 1
             continue
         res.failed += 1
-        body = by_name.get(_key(nid))
+        body = body_for(full)
         if body is None:                                   # never ran: collection error in its file
             f = nid.split("::")[0]
             body = collect.get(f) or next(iter(collect.values()), "")

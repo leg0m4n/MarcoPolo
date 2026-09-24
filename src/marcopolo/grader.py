@@ -77,6 +77,9 @@ class Grader:
         self.files = test_files(instance["eval_script"])
         self.relevant = _as_list(instance["FAIL_TO_PASS"]) + _as_list(instance["PASS_TO_PASS"])
         self.test_patch = instance["test_patch"]
+        # decide pass/fail exactly as scoring will (see check.parse)
+        from swebench.harness.log_parsers import PARSER_REGISTRY
+        self.status_parser = PARSER_REGISTRY.get(instance.get("log_parser", ""))
         self.container = None
         self.log: list[dict] = []
 
@@ -120,7 +123,7 @@ class Grader:
         quoted = " ".join(f"'{f}'" for f in self.files)
         out = dexec(self.container, f"{ACT} && COLUMNS=250 python -m pytest -rA --tb=long --showlocals "
                                     f"-p no:cacheprovider {quoted} 2>&1").stdout
-        res = parse(out, self.relevant)
+        res = parse(out, self.relevant, self.status_parser)
         self.log.append({"t": round(t0, 2), "seconds": round(time.time() - t0, 1), "passed": res.passed,
                          "failed": res.failed, "all_passed": res.ok, "chars": None, "diff_chars": len(diff)})
         return res

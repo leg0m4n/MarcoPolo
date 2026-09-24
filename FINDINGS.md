@@ -315,3 +315,33 @@ per task, once each).
    the two overflowed runs (7.9 GB left behind). Fixed in `run_pilot.sh`.
 3. **Analysis tool bug.** `trajectory.py` counted North Mini Code's normal
    tool-call turns (blank content) as empty. Fixed and tested.
+
+---
+
+# Building `check`: what real task containers taught us (2026-09-24)
+
+Each would have silently corrupted results; each is now guarded by a test.
+
+1. **Target tests that need the internet.** psf__requests-1724: 0/6 target
+   tests pass offline even with the gold patch (they call httpbin.org). With
+   no network — the agent's and grader's condition — the task is unwinnable.
+   The pre-flight rejects such tasks.
+2. **One missing test id runs nothing.** Passing FAIL_TO_PASS/PASS_TO_PASS ids
+   to pytest: if one id is not found, pytest runs no tests at all. `check` runs
+   the task's test files, as the official evaluator does.
+3. **`git clean -x` deletes compiled extensions.** Resetting the grader with
+   `-x` removed astropy's C modules, so every test "failed to load", fixed or
+   not. The grader cleans with `-fd`.
+4. **SWE-bench's truncated test ids.** 676 ids in SWE-bench Verified are cut
+   mid-parameter at a space (SWE-bench issue #290), e.g.
+   `test_non_mapping_init[ceci`. Newer official parsers keep the full name, so
+   the ids never match exactly; official grading reconciles them by prefix
+   (`swebench.harness.grading._resolve_case`). Verified: the official evaluator
+   resolves astropy__astropy-13236 with its gold patch. `check` now uses the
+   task's official parser and that same resolution function, so it decides
+   pass/fail exactly as scoring does.
+5. **Rung 3 lost expected-vs-actual.** numpy's `assert_allclose` puts actual
+   and desired values on the lines after a bare `AssertionError:`; keeping only
+   the first line dropped them.
+6. **The padded control was misleading, not neutral.** Its filler said "no
+   tests ran" right after "2 tests failed".
