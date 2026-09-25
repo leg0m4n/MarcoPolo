@@ -345,3 +345,61 @@ Each would have silently corrupted results; each is now guarded by a test.
    the first line dropped them.
 6. **The padded control was misleading, not neutral.** Its filler said "no
    tests ran" right after "2 tests failed".
+
+---
+
+# Pre-flight v2: 46 candidates through the real `check` (2026-09-24)
+
+**40 admitted, 6 rejected**, every rejection an environment limit, none a
+harness failure:
+
+| task | why it cannot be won here |
+|---|---|
+| psf__requests-1724, -1766, -1921, -2317 | target tests call httpbin.org; offline, 0–1 of 6–8 pass even with the gold patch |
+| sphinx-doc__sphinx-7985 | linkcheck tests fetch google.com and sphinx-doc.org |
+| pylint-dev__pylint-6528 | 4 regression tests skip: the container reports < 2 CPU cores ("Need 2 or more cores for test to be meaningful"). The host has 32; pylint reads Docker's default CPU weight as one core on this cgroup-v1 host. The official evaluator shares the environment, so the gold patch could not resolve it either. |
+
+## Coloured output silently broke rungs 3 and 4 on 8 tasks
+
+Some repositories force coloured pytest output (astropy's settings among
+them), so every line begins with ANSI escape codes. The official status
+parser strips them, so pass/fail stayed correct, but `check`'s section
+parser matched nothing: rung 3 showed only "FAILED" with no location, and
+rung 4 showed the same. The rung-collapse report surfaced it as "rung 4 ==
+rung 3 on 8/40 tasks"; the real defect was worse, since rung 3 carried no
+information on those tasks either.
+
+Fixed twice over: the grader passes `--color=no`, and the parser strips
+escape codes. Pinned by a test on the real astropy output
+(`tests/fixtures/pytest_astropy_ansi_color.txt`). Rung 3 on that task now
+reads `assert Unit("km Mpc / s") == Unit("km / (Mpc s)")` — the bug itself.
+
+---
+
+# First unattended night (2026-09-24 23:00 → 00:36)
+
+Cron opened the window at 23:00, vLLM came up in 70 s, 9 runs completed, and
+vLLM shut itself down at 00:36 when both queues were empty. No intervention.
+
+**The model uses `check`.** Smoke test, two pre-flight-admitted tasks at the
+two extreme rungs:
+
+| task | rung | submitted | final state | turns | checks | first all-pass |
+|---|---|---|---|---|---|---|
+| astropy-12907 | outcome | resolved | resolved | 90 | — | — |
+| astropy-12907 | trace | resolved | resolved | 87 | 6 | check #4 |
+| astropy-13236 | outcome | resolved | resolved | 94 | 4 | check #4 |
+| astropy-13236 | trace | context overflow | **resolved** | 119 | 8 | check #6 |
+
+The overflowed rung-4 run had every test passing by check #6, kept working,
+and ran out of context before submitting. Its `check` output totalled ~1.6K
+tokens, so feedback size did not cause the overflow; the agent's own
+exploration did.
+
+**Native re-run of the pilot tasks** (`max_tokens` 4096, batch-1 CUDA graphs):
+0/5 submitted, **1/5 final state** (sympy-17655 fixed the bug, then
+overflowed), 3/5 context overflows, 7.8 min per run (19.5 in the first pilot),
+largest turn 2,904 tokens, no truncation.
+
+Both "fixed, then out of context" cases are exactly what the secondary
+final-state policy was added to see.

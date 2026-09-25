@@ -128,10 +128,20 @@ def check_task(t, row):
         pkg = PKG.get(t["repo"], t["repo"].split("/")[1])
         rec["imports_without_pytest"] = "IMPORT_OK" in gexec(agent, f"{GACT} && python -c 'import {pkg}' && echo IMPORT_OK").stdout
 
-        not_run = lambda res: res.failures and all(f.get("message", "").startswith("not run") for f in res.failures)
-        if base.passed + base.failed == 0 or not_run(gold):
+        # HARNESS means the machinery itself failed: nothing ran, or the target
+        # tests never ran even with the fix. Distinct from a few regression tests
+        # that do not run in THIS environment (e.g. pylint skips its multiprocessing
+        # tests when the container reports < 2 cores) — those make the task
+        # unwinnable here, since the official evaluator shares the environment.
+        not_run = {f["test"] for f in gold.failures if f.get("message", "").startswith("not run")}
+        if base.passed + base.failed == 0 or (f2p & not_run):
             return {**rec, "admitted": False, "reason": "HARNESS: tests did not run; investigate, do not trust"}
         reasons = []
+        env_skipped = sorted(p2p & not_run)
+        if env_skipped:
+            rec["regression_tests_not_run_here"] = env_skipped[:10]
+            reasons.append(f"{len(env_skipped)} regression tests do not run in this environment (skipped or absent)")
+            n_gold_p2p_failing -= len(env_skipped)
         if rec["base_f2p_failing"] != len(f2p): reasons.append(f"{len(f2p) - rec['base_f2p_failing']} target tests already pass unfixed")
         if rec["gold_f2p_passing"] != len(f2p): reasons.append(f"only {rec['gold_f2p_passing']}/{len(f2p)} target tests pass with the real fix")
         if n_gold_p2p_failing: reasons.append(f"{n_gold_p2p_failing} regression tests fail with the real fix")

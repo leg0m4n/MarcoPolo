@@ -12,7 +12,7 @@ deleted after its last run.
 
 CLI:
     python -m marcopolo.runqueue build <exp> <tasks.json> <cond,cond,..> <attempts>
-    python -m marcopolo.runqueue next <exp>            # "run_id instance cond n_f2p", exit 1 if done
+    python -m marcopolo.runqueue next <exp>            # "run_id instance cond n_f2p dataset", exit 1 if done
     python -m marcopolo.runqueue pending-for <exp> <instance_id>
     python -m marcopolo.runqueue stats <exp>
 """
@@ -23,12 +23,14 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2] / "results"
+DEFAULT_DATASET = "SWE-bench/SWE-bench_Verified"
 
 
 def build(exp: str, tasks_file: str, conditions: list[str], attempts: int) -> list[dict]:
     tasks = json.loads(Path(tasks_file).read_text())["tasks"]
     specs = [{"run_id": f"{t['instance_id']}__{c}__a{a}", "instance_id": t["instance_id"],
-              "condition": c, "attempt": a, "n_fail_to_pass": t["n_fail_to_pass"]}
+              "condition": c, "attempt": a, "n_fail_to_pass": t["n_fail_to_pass"],
+              "dataset": t.get("dataset", DEFAULT_DATASET)}
              for t in tasks for c in conditions for a in range(1, attempts + 1)]
     d = ROOT / exp
     if (d / "queue.json").exists():
@@ -61,7 +63,8 @@ def _main(argv: list[str]) -> int:
         if not p:
             return 1
         r = p[0]
-        print(r["run_id"], r["instance_id"], r["condition"], r["n_fail_to_pass"])
+        print(r["run_id"], r["instance_id"], r["condition"], r["n_fail_to_pass"],
+              r.get("dataset", DEFAULT_DATASET))
     elif cmd == "pending-for":
         print(sum(r["instance_id"] == argv[3] for r in pending(exp)))
     elif cmd == "stats":

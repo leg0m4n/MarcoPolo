@@ -102,3 +102,20 @@ def test_ids_with_spaces_match_the_datasets_truncated_ids():
     assert (res.passed, res.failed) == (1, 1)
     f = res.failures[0]
     assert f["status"] == "FAILED" and "ceci n'est pas un meta" in f["message"]
+
+
+def test_coloured_output_is_parsed():
+    """astropy forces colour: every line starts with escape codes. Without
+    stripping them, rung 3 and 4 silently lost all content (found on 8/40 tasks)."""
+    from swebench.harness.log_parsers import PARSER_REGISTRY
+    out = (FX / "pytest_astropy_ansi_color.txt").read_text()
+    assert "\x1b[" in out, "fixture must be the raw coloured output"
+    nid = "astropy/units/tests/test_format.py::test_cds_grammar[strings4-unit4]"
+    f = parse(out, [nid], PARSER_REGISTRY["parse_log_astropy"]).failures[0]
+    assert f["message"] != "FAILED" and f["path"] is not None
+    res = parse(out, [nid], PARSER_REGISTRY["parse_log_astropy"])
+    assert render(res, "trace") != render(res, "diff")
+    assert "\x1b[" not in render(res, "trace"), "no escape codes reach the agent"
+    vals = f["values"]
+    assert "unit2 = Unit(\"km Mpc / s\")" in vals
+    assert not any(", unit = " in v for v in vals), "the combined argument line is not repeated"

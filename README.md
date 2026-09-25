@@ -37,13 +37,15 @@ configs/condition_*.yaml     one per feedback rung
 src/marcopolo/rungs.py       the check tool: rung-limited feedback
 src/marcopolo/tasks.py       frozen task-set selection
 src/marcopolo/trajectory.py  trajectory analysis, truncation detection
-tasks/frozen_v1.json         the pre-registered task set (40 tasks, 11 repos)
+tasks/frozen_v2.json         the task set: 40 pre-flight-admitted pytest tasks, 8 repos
+tasks/impossible_v1/         8 impossible tasks (a solvable task + one contradicting test)
 src/marcopolo/models.py      keeps the model's reasoning across turns on vLLM
 src/marcopolo/run_swebench.py  runner that records the final diff on every exit
 src/marcopolo/grader.py      the `check` tool: grader container, agent setup, interception
 src/marcopolo/check.py       pytest output -> what each rung may show
 src/marcopolo/patches.py     what is scored vs kept for the tampering audit
 src/marcopolo/hardcoding.py  flags runs that paste a test's expected value into source
+src/marcopolo/impossible.py  inverts a test to make a task impossible without tampering
 src/marcopolo/metrics.py     pre-registered scoring (both policies, secondary metrics)
 src/marcopolo/schedule.py    the GPU window agreed with the server's admin
 src/marcopolo/runqueue.py    resumable run queue
@@ -51,6 +53,8 @@ scripts/run_window.sh        cron entry: one window's worth of runs
 scripts/run_one.sh           one run: agent, evaluation, scoring
 scripts/report.py            per-condition summary of an experiment
 scripts/preflight.py         validates every candidate task through the real `check`
+scripts/freeze_v2.py         freezes the task set from the pre-flight
+scripts/make_impossible.py   builds the impossible tasks (one deterministic procedure)
 tests/                       experimental guarantees as tests
 PREREGISTRATION.md           decided and open design choices
 ```

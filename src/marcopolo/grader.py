@@ -122,7 +122,7 @@ class Grader:
                 return None
         quoted = " ".join(f"'{f}'" for f in self.files)
         out = dexec(self.container, f"{ACT} && COLUMNS=250 python -m pytest -rA --tb=long --showlocals "
-                                    f"-p no:cacheprovider {quoted} 2>&1").stdout
+                                    f"--color=no -p no:cacheprovider {quoted} 2>&1").stdout
         res = parse(out, self.relevant, self.status_parser)
         self.log.append({"t": round(t0, 2), "seconds": round(time.time() - t0, 1), "passed": res.passed,
                          "failed": res.failed, "all_passed": res.ok, "chars": None, "diff_chars": len(diff)})

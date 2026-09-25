@@ -23,6 +23,10 @@ import re
 from marcopolo.rungs import CheckResult
 
 PASS = ("PASSED", "XFAIL")          # swebench grading counts both as passing
+# Some repositories force coloured output (e.g. astropy's pytest settings), so
+# every line starts with escape codes and nothing below would match. The grader
+# asks for --color=no; this strips any that remain.
+_ANSI = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]|\x1b\][^\x07]*\x07")
 _SECTION = re.compile(r"^={5,} (FAILURES|ERRORS|PASSES|short test summary info|warnings summary) ={5,}\s*$")
 _END = re.compile(r"^={5,} .*\b(passed|failed|error|errors|skipped|no tests ran)\b.* ={5,}\s*$")
 _HEADER = re.compile(r"^_{3,} (.+?) _{3,}\s*$")
@@ -101,6 +105,10 @@ def _detail(body: str) -> dict:
                 loc = (_repo_path(m.group(1)), int(m.group(2)))
                 continue
             lm = _LOCAL.match(line)
+            # skip pytest's one-line argument summary ("a = 1, b = 2"): the same
+            # values are listed individually in the locals block
+            if lm and re.search(r", [A-Za-z_]\w* = ", lm.group(2)):
+                continue
             if lm and lm.group(1) not in ("self", "cls") and " at 0x" not in lm.group(2):
                 v = lm.group(2).strip()
                 locals_.append(f"{lm.group(1)} = {v[:MAX_VALUE]}{'...' if len(v) > MAX_VALUE else ''}")
@@ -138,6 +146,7 @@ def parse(output: str, relevant: list[str], status_parser=None) -> CheckResult:
     FAIL_TO_PASS/PASS_TO_PASS ids are truncated the same way — so matching
     against the dataset's ids only works with the official parser.
     """
+    output = _ANSI.sub("", output)
     own = statuses(output)
     if status_parser is not None:
         from swebench.harness.grading import _resolve_case

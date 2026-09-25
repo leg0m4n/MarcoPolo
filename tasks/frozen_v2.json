@@ -1,0 +1,821 @@
+{
+  "source": "SWE-bench/SWE-bench_Verified",
+  "preflight": "results/preflight_v2.jsonl",
+  "rule": "every pre-flight admit, at most 10 per repository (seed 0)",
+  "n": 40,
+  "tasks": [
+    {
+      "instance_id": "astropy__astropy-12907",
+      "repo": "astropy/astropy",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 13,
+      "image": "swebench/sweb.eval.x86_64.astropy_1776_astropy-12907:latest",
+      "created_at": "2022-03-03",
+      "check_seconds": 2.0,
+      "test_files": [
+        "astropy/modeling/tests/test_separable.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 187,
+        "diff": 655,
+        "trace": 1050,
+        "padded": 1050
+      }
+    },
+    {
+      "instance_id": "astropy__astropy-13236",
+      "repo": "astropy/astropy",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 644,
+      "image": "swebench/sweb.eval.x86_64.astropy_1776_astropy-13236:latest",
+      "created_at": "2022-05-09",
+      "check_seconds": 4.7,
+      "test_files": [
+        "astropy/table/tests/test_mixin.py",
+        "astropy/table/tests/test_table.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 149,
+        "diff": 327,
+        "trace": 963,
+        "padded": 963
+      }
+    },
+    {
+      "instance_id": "astropy__astropy-13398",
+      "repo": "astropy/astropy",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 4,
+      "n_pass_to_pass": 68,
+      "image": "swebench/sweb.eval.x86_64.astropy_1776_astropy-13398:latest",
+      "created_at": "2022-06-24",
+      "check_seconds": 3.2,
+      "test_files": [
+        "astropy/coordinates/tests/test_intermediate_transformations.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 421,
+        "diff": 873,
+        "trace": 4450,
+        "padded": 4450
+      }
+    },
+    {
+      "instance_id": "astropy__astropy-13977",
+      "repo": "astropy/astropy",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 20,
+      "n_pass_to_pass": 322,
+      "image": "swebench/sweb.eval.x86_64.astropy_1776_astropy-13977:latest",
+      "created_at": "2022-11-01",
+      "check_seconds": 4.0,
+      "test_files": [
+        "astropy/units/tests/test_quantity.py",
+        "astropy/units/tests/test_quantity_ufuncs.py"
+      ],
+      "rung_chars": {
+        "outcome": 16,
+        "location": 2990,
+        "diff": 5914,
+        "trace": 19414,
+        "padded": 19414
+      }
+    },
+    {
+      "instance_id": "astropy__astropy-14369",
+      "repo": "astropy/astropy",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 3,
+      "n_pass_to_pass": 732,
+      "image": "swebench/sweb.eval.x86_64.astropy_1776_astropy-14369:latest",
+      "created_at": "2023-02-06",
+      "check_seconds": 2.9,
+      "test_files": [
+        "astropy/units/tests/test_format.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 306,
+        "diff": 682,
+        "trace": 1062,
+        "padded": 1062
+      }
+    },
+    {
+      "instance_id": "astropy__astropy-14539",
+      "repo": "astropy/astropy",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 46,
+      "image": "swebench/sweb.eval.x86_64.astropy_1776_astropy-14539:latest",
+      "created_at": "2023-03-16",
+      "check_seconds": 2.1,
+      "test_files": [
+        "astropy/io/fits/tests/test_diff.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 163,
+        "diff": 439,
+        "trace": 1802,
+        "padded": 1802
+      }
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-20676",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 32,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-20676:latest",
+      "created_at": "2021-07-19",
+      "check_seconds": 7.0,
+      "test_files": [
+        "lib/matplotlib/tests/test_widgets.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 171,
+        "diff": 447,
+        "trace": 789,
+        "padded": 789
+      }
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-21568",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 4,
+      "n_pass_to_pass": 73,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-21568:latest",
+      "created_at": "2021-11-08",
+      "check_seconds": 6.1,
+      "test_files": [
+        "lib/matplotlib/tests/test_dates.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 371,
+        "diff": 1317,
+        "trace": 3192,
+        "padded": 3192
+      }
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-22865",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 3,
+      "n_pass_to_pass": 57,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-22865:latest",
+      "created_at": "2022-04-20",
+      "check_seconds": 7.9,
+      "test_files": [
+        "lib/matplotlib/tests/test_colorbar.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 277,
+        "diff": 1555,
+        "trace": 3845,
+        "padded": 3845
+      }
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-24026",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 764,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-24026:latest",
+      "created_at": "2022-09-28",
+      "check_seconds": 60.3,
+      "test_files": [
+        "lib/matplotlib/tests/test_axes.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 133,
+        "diff": 325,
+        "trace": 2671,
+        "padded": 2670
+      }
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-24570",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 267,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-24570:latest",
+      "created_at": "2022-11-30",
+      "check_seconds": 4.7,
+      "test_files": [
+        "lib/matplotlib/tests/test_offsetbox.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 142,
+        "diff": 594,
+        "trace": 1059,
+        "padded": 1058
+      }
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25122",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 12,
+      "n_pass_to_pass": 2476,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-25122:latest",
+      "created_at": "2023-02-01",
+      "check_seconds": 11.0,
+      "test_files": [
+        "lib/matplotlib/tests/test_mlab.py"
+      ],
+      "rung_chars": {
+        "outcome": 16,
+        "location": 1224,
+        "diff": 4731,
+        "trace": 11967,
+        "padded": 11967
+      }
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25287",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 786,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-25287:latest",
+      "created_at": "2023-02-22",
+      "check_seconds": 62.7,
+      "test_files": [
+        "lib/matplotlib/tests/test_axes.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 149,
+        "diff": 343,
+        "trace": 421,
+        "padded": 421
+      }
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25479",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 263,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-25479:latest",
+      "created_at": "2023-03-16",
+      "check_seconds": 5.9,
+      "test_files": [
+        "lib/matplotlib/tests/test_colors.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 148,
+        "diff": 449,
+        "trace": 449,
+        "padded": 449
+      }
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-25775",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 7,
+      "n_pass_to_pass": 89,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-25775:latest",
+      "created_at": "2023-04-26",
+      "check_seconds": 14.2,
+      "test_files": [
+        "lib/matplotlib/tests/test_text.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 567,
+        "diff": 1248,
+        "trace": 6228,
+        "padded": 6228
+      }
+    },
+    {
+      "instance_id": "matplotlib__matplotlib-26208",
+      "repo": "matplotlib/matplotlib",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 813,
+      "image": "swebench/sweb.eval.x86_64.matplotlib_1776_matplotlib-26208:latest",
+      "created_at": "2023-06-28",
+      "check_seconds": 62.9,
+      "test_files": [
+        "lib/matplotlib/tests/test_axes.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 131,
+        "diff": 297,
+        "trace": 1025,
+        "padded": 1025
+      }
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3069",
+      "repo": "mwaskom/seaborn",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 94,
+      "image": "swebench/sweb.eval.x86_64.mwaskom_1776_seaborn-3069:latest",
+      "created_at": "2022-10-09",
+      "check_seconds": 21.1,
+      "test_files": [
+        "tests/_core/test_plot.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 155,
+        "diff": 476,
+        "trace": 556,
+        "padded": 556
+      }
+    },
+    {
+      "instance_id": "mwaskom__seaborn-3187",
+      "repo": "mwaskom/seaborn",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 248,
+      "image": "swebench/sweb.eval.x86_64.mwaskom_1776_seaborn-3187:latest",
+      "created_at": "2022-12-18",
+      "check_seconds": 43.4,
+      "test_files": [
+        "tests/_core/test_plot.py",
+        "tests/test_relational.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 162,
+        "diff": 311,
+        "trace": 849,
+        "padded": 849
+      }
+    },
+    {
+      "instance_id": "psf__requests-6028",
+      "repo": "psf/requests",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 185,
+      "image": "swebench/sweb.eval.x86_64.psf_1776_requests-6028:latest",
+      "created_at": "2022-01-04",
+      "check_seconds": 0.8,
+      "test_files": [
+        "tests/test_utils.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 277,
+        "diff": 701,
+        "trace": 1161,
+        "padded": 1161
+      }
+    },
+    {
+      "instance_id": "pydata__xarray-3993",
+      "repo": "pydata/xarray",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 2398,
+      "image": "swebench/sweb.eval.x86_64.pydata_1776_xarray-3993:latest",
+      "created_at": "2020-04-21",
+      "check_seconds": 60.8,
+      "test_files": [
+        "xarray/tests/test_dataset.py",
+        "xarray/tests/test_units.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 518,
+        "diff": 1288,
+        "trace": 4376,
+        "padded": 4376
+      }
+    },
+    {
+      "instance_id": "pydata__xarray-4075",
+      "repo": "pydata/xarray",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 958,
+      "image": "swebench/sweb.eval.x86_64.pydata_1776_xarray-4075:latest",
+      "created_at": "2020-05-18",
+      "check_seconds": 6.2,
+      "test_files": [
+        "xarray/tests/test_weighted.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 143,
+        "diff": 448,
+        "trace": 800,
+        "padded": 800
+      }
+    },
+    {
+      "instance_id": "pydata__xarray-4356",
+      "repo": "pydata/xarray",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 8,
+      "n_pass_to_pass": 604,
+      "image": "swebench/sweb.eval.x86_64.pydata_1776_xarray-4356:latest",
+      "created_at": "2020-08-19",
+      "check_seconds": 10.6,
+      "test_files": [
+        "xarray/tests/test_duck_array_ops.py"
+      ],
+      "rung_chars": {
+        "outcome": 16,
+        "location": 1274,
+        "diff": 3098,
+        "trace": 13386,
+        "padded": 13386
+      }
+    },
+    {
+      "instance_id": "pydata__xarray-4966",
+      "repo": "pydata/xarray",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 4,
+      "n_pass_to_pass": 21,
+      "image": "swebench/sweb.eval.x86_64.pydata_1776_xarray-4966:latest",
+      "created_at": "2021-02-26",
+      "check_seconds": 3.7,
+      "test_files": [
+        "xarray/tests/test_coding.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 297,
+        "diff": 671,
+        "trace": 1947,
+        "padded": 1947
+      }
+    },
+    {
+      "instance_id": "pydata__xarray-6744",
+      "repo": "pydata/xarray",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 3,
+      "n_pass_to_pass": 1815,
+      "image": "swebench/sweb.eval.x86_64.pydata_1776_xarray-6744:latest",
+      "created_at": "2022-07-02",
+      "check_seconds": 50.2,
+      "test_files": [
+        "xarray/tests/test_rolling.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 564,
+        "diff": 1978,
+        "trace": 4504,
+        "padded": 4504
+      }
+    },
+    {
+      "instance_id": "pydata__xarray-7393",
+      "repo": "pydata/xarray",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 71,
+      "image": "swebench/sweb.eval.x86_64.pydata_1776_xarray-7393:latest",
+      "created_at": "2022-12-20",
+      "check_seconds": 3.8,
+      "test_files": [
+        "xarray/tests/test_indexes.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 169,
+        "diff": 377,
+        "trace": 515,
+        "padded": 515
+      }
+    },
+    {
+      "instance_id": "pylint-dev__pylint-4551",
+      "repo": "pylint-dev/pylint",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 10,
+      "n_pass_to_pass": 0,
+      "image": "swebench/sweb.eval.x86_64.pylint-dev_1776_pylint-4551:latest",
+      "created_at": "2021-06-07",
+      "check_seconds": 1.1,
+      "test_files": [
+        "tests/unittest_pyreverse_writer.py"
+      ],
+      "rung_chars": {
+        "outcome": 16,
+        "location": 762,
+        "diff": 2352,
+        "trace": 2352,
+        "padded": 2352
+      }
+    },
+    {
+      "instance_id": "pylint-dev__pylint-4604",
+      "repo": "pylint-dev/pylint",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 21,
+      "n_pass_to_pass": 0,
+      "image": "swebench/sweb.eval.x86_64.pylint-dev_1776_pylint-4604:latest",
+      "created_at": "2021-06-22",
+      "check_seconds": 1.2,
+      "test_files": [
+        "tests/checkers/unittest_variables.py"
+      ],
+      "rung_chars": {
+        "outcome": 16,
+        "location": 2100,
+        "diff": 4940,
+        "trace": 4940,
+        "padded": 4940
+      }
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-13142",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 54,
+      "image": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-13142:latest",
+      "created_at": "2019-02-12",
+      "check_seconds": 7.2,
+      "test_files": [
+        "sklearn/mixture/tests/test_bayesian_mixture.py",
+        "sklearn/mixture/tests/test_gaussian_mixture.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 201,
+        "diff": 749,
+        "trace": 1468,
+        "padded": 1468
+      }
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-13779",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 18,
+      "image": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-13779:latest",
+      "created_at": "2019-05-03",
+      "check_seconds": 2.5,
+      "test_files": [
+        "sklearn/ensemble/tests/test_voting.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 195,
+        "diff": 383,
+        "trace": 1804,
+        "padded": 1804
+      }
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-14087",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 3,
+      "n_pass_to_pass": 172,
+      "image": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-14087:latest",
+      "created_at": "2019-06-13",
+      "check_seconds": 12.2,
+      "test_files": [
+        "sklearn/linear_model/tests/test_logistic.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 303,
+        "diff": 651,
+        "trace": 2951,
+        "padded": 2951
+      }
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-14983",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 105,
+      "image": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-14983:latest",
+      "created_at": "2019-09-14",
+      "check_seconds": 2.3,
+      "test_files": [
+        "sklearn/model_selection/tests/test_split.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 197,
+        "diff": 775,
+        "trace": 1217,
+        "padded": 1217
+      }
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-25102",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 59,
+      "image": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-25102:latest",
+      "created_at": "2022-12-02",
+      "check_seconds": 3.1,
+      "test_files": [
+        "sklearn/feature_selection/tests/test_base.py",
+        "sklearn/feature_selection/tests/test_feature_select.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 176,
+        "diff": 402,
+        "trace": 1146,
+        "padded": 1146
+      }
+    },
+    {
+      "instance_id": "scikit-learn__scikit-learn-26194",
+      "repo": "scikit-learn/scikit-learn",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 186,
+      "image": "swebench/sweb.eval.x86_64.scikit-learn_1776_scikit-learn-26194:latest",
+      "created_at": "2023-04-17",
+      "check_seconds": 2.5,
+      "test_files": [
+        "sklearn/metrics/tests/test_ranking.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 179,
+        "diff": 463,
+        "trace": 1109,
+        "padded": 1109
+      }
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-11445",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 8,
+      "image": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-11445:latest",
+      "created_at": "2023-05-28",
+      "check_seconds": 1.1,
+      "test_files": [
+        "tests/test_util_rst.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 186,
+        "diff": 782,
+        "trace": 1446,
+        "padded": 1446
+      }
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-11510",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 7,
+      "image": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-11510:latest",
+      "created_at": "2023-07-24",
+      "check_seconds": 1.5,
+      "test_files": [
+        "tests/roots/test-directive-include/conf.py",
+        "tests/test_directive_other.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 163,
+        "diff": 487,
+        "trace": 957,
+        "padded": 957
+      }
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-7462",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 49,
+      "image": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-7462:latest",
+      "created_at": "2020-04-12",
+      "check_seconds": 1.9,
+      "test_files": [
+        "tests/test_domain_py.py",
+        "tests/test_pycode_ast.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 116,
+        "diff": 256,
+        "trace": 904,
+        "padded": 904
+      }
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-7748",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 12,
+      "image": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-7748:latest",
+      "created_at": "2020-05-30",
+      "check_seconds": 1.7,
+      "test_files": [
+        "tests/roots/test-ext-autodoc/target/docstring_signature.py",
+        "tests/test_ext_autodoc_configs.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 197,
+        "diff": 855,
+        "trace": 1531,
+        "padded": 1531
+      }
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8593",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "15 min - 1 hour",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 1,
+      "image": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-8593:latest",
+      "created_at": "2020-12-27",
+      "check_seconds": 1.4,
+      "test_files": [
+        "tests/roots/test-ext-autodoc/target/private.py",
+        "tests/test_ext_autodoc_private_members.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 149,
+        "diff": 739,
+        "trace": 1425,
+        "padded": 1425
+      }
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-8621",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "<15 min fix",
+      "n_fail_to_pass": 2,
+      "n_pass_to_pass": 31,
+      "image": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-8621:latest",
+      "created_at": "2020-12-30",
+      "check_seconds": 1.9,
+      "test_files": [
+        "tests/test_markup.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 143,
+        "diff": 231,
+        "trace": 1551,
+        "padded": 1551
+      }
+    },
+    {
+      "instance_id": "sphinx-doc__sphinx-9461",
+      "repo": "sphinx-doc/sphinx",
+      "difficulty": "1-4 hours",
+      "n_fail_to_pass": 3,
+      "n_pass_to_pass": 59,
+      "image": "swebench/sweb.eval.x86_64.sphinx-doc_1776_sphinx-9461:latest",
+      "created_at": "2021-07-17",
+      "check_seconds": 3.7,
+      "test_files": [
+        "tests/roots/test-ext-autodoc/target/properties.py",
+        "tests/test_domain_py.py",
+        "tests/test_ext_autodoc_autoclass.py",
+        "tests/test_ext_autodoc_autoproperty.py"
+      ],
+      "rung_chars": {
+        "outcome": 15,
+        "location": 186,
+        "diff": 754,
+        "trace": 2207,
+        "padded": 2207
+      }
+    }
+  ]
+}

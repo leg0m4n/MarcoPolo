@@ -124,6 +124,7 @@ def _uncovered_lines(repo: Path) -> list[str]:
 
 
 MAX_LISTED = 20    # failing tests shown individually; the rest summarised
+MAX_DETAILED = 5   # at rungs 3-4, failing tests given full detail; the rest by name
 MAX_VALUES = 12    # rung-4 values shown per failing test
 MAX_MESSAGE_LINES = 6   # lines of the error message (rungs 3 and 4 alike)
 
@@ -134,7 +135,9 @@ def render(res: CheckResult, rung: str, repo: Path | None = None,
 
     Every rung shows at most MAX_LISTED failing tests individually, so an agent
     that breaks hundreds of tests does not flood its context, and the cap is the
-    same for every rung.
+    same for every rung. At rungs 3 and 4 only the first MAX_DETAILED of those
+    get full detail; the rest are named, as at rung 2 — so with 20 failing tests
+    rung 4 costs ~1-2K tokens per check rather than ~5K.
     """
     if rung not in RUNGS:
         raise ValueError(f"unknown rung {rung!r}; expected one of {RUNGS}")
@@ -160,7 +163,10 @@ def render(res: CheckResult, rung: str, repo: Path | None = None,
         return "\n".join([f"{n} failed:"] + [f"{f['test']} failed" for f in shown] + tail)
 
     lines = [f"{n} failed:"]
-    for f in shown:
+    for k, f in enumerate(shown):
+        if k >= MAX_DETAILED:                 # beyond the detail cap: named, as at rung 2
+            lines.append(f"{f['test']} failed")
+            continue
         loc = _rel(f.get("path"), repo)
         loc = f"{loc}:{f['lineno']}" if loc and f.get("lineno") else "?"
         msg = [m for m in (f.get("message") or "").splitlines() if m.strip()][:MAX_MESSAGE_LINES]

@@ -31,9 +31,9 @@ bash scripts/vllm_ctl.sh start || { echo "$(ts) vLLM would not start; giving up 
 while $PY -m marcopolo.schedule can-start; do
   EXP=$(next_exp) || { echo "$(ts) all queues empty"; break; }
   spec=$($PY -m marcopolo.runqueue next "$EXP")
-  read -r RUN_ID IID COND NF2P <<< "$spec"
+  read -r RUN_ID IID COND NF2P DS <<< "$spec"
   echo "$(ts) [$EXP] start $RUN_ID"
-  bash scripts/run_one.sh "$EXP" "$RUN_ID" "$IID" "$COND" "$NF2P"
+  bash scripts/run_one.sh "$EXP" "$RUN_ID" "$IID" "$COND" "$NF2P" "$DS"
   rc=$?
   if [ $rc -eq 3 ]; then                   # server died: restart once, retry the run later
     bash scripts/vllm_ctl.sh stop; bash scripts/vllm_ctl.sh start || break

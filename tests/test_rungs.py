@@ -111,3 +111,16 @@ def test_padding_makes_no_claim_about_the_run():
     body = render(_failing(), "padded", Path("/repo"))
     filler = body.split("\n", 1)[1]
     assert not re.search(r"\d+ (items|tests?|passed|failed)|no tests ran|error", filler, re.I)
+
+
+def test_detail_cap_at_rungs_3_and_4():
+    """Only the first 5 failing tests get full detail; the rest are named."""
+    from marcopolo.rungs import MAX_DETAILED
+    fails = [{"test": f"t.py::test_{i}", "message": f"AssertionError: case {i}", "path": "/repo/t.py",
+              "lineno": i, "longrepr": "", "values": [f"x = {i}"], "frames": []} for i in range(8)]
+    res = CheckResult(passed=0, failed=8, failures=fails)
+    for rung in ("diff", "trace"):
+        body = render(res, rung, Path("/repo"))
+        assert body.count("AssertionError: case") == MAX_DETAILED == 5, rung
+        assert "t.py::test_7 failed" in body and "case 7" not in body, rung
+    assert render(res, "trace", Path("/repo")).count("values at failure") == 5
