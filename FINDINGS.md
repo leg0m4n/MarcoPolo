@@ -403,3 +403,95 @@ largest turn 2,904 tokens, no truncation.
 
 Both "fixed, then out of context" cases are exactly what the secondary
 final-state policy was added to see.
+
+---
+
+# Cohere's hosted North Mini Code (2026-09-25)
+
+Probed with a trial key through the OpenAI-compatible endpoint
+(`https://api.cohere.ai/compatibility/v1`, model `north-mini-code-1-0`).
+256K context, full precision; trial keys: 20 calls/min, 1,000/month;
+production keys: 500 calls/min. Cohere's pricing page does not list the
+model; a trial key cannot show what production use costs.
+
+**Reasoning passback is the mirror image of vLLM.** Cohere returns reasoning
+as `reasoning_content` and reads it back only from `reasoning_content`; vLLM
+returns and reads `reasoning`. Test: the model invents a codename only in its
+turn-1 reasoning; on turn 2 it recalls it ("Nebulova") only when the reasoning
+is sent back as `reasoning_content` — omitted or sent as `reasoning`, it
+guesses ("Nebulon"). The vLLM fix, applied here, would have reintroduced the
+silent drop. Hence one model class per backend (`NorthVLLMModel`,
+`NorthCohereModel`). Reported prompt-token counts do not reflect the full
+prompt (5 tokens for a one-line message; unchanged with or without reasoning),
+so they cannot be used to check this.
+
+**`parallel_tool_calls` is rejected.** mini-swe-agent's SWE-bench config sets
+it; Cohere answers "parallel_tool_calls is not supported". Dropped for the
+hosted backend only — a real difference: the vLLM runs may issue several
+commands per turn.
+
+**API errors had been scored as agent failures.** The first hosted run died on
+its first call and was written up "resolved=False". `run_one.sh` now marks any
+API/infrastructure exit (BadRequestError, RateLimitError, connection errors,
+…) invalid and re-queues it; context overflow remains a scored outcome. A run
+invalid 3 times is parked for a human rather than retried every 15 minutes.
+
+**End to end: resolved.** astropy-12907 at rung 4 through the full harness:
+submitted, 2/2 target tests, 52 turns, 12.3K generated tokens, 4.6 min, first
+all-pass at the 2nd `check`. The same task and rung locally took 87 turns and
+29.4K tokens — one run each, so not yet evidence of anything.
+
+---
+
+# Sandbox and leak check (2026-09-25)
+
+**The stock evaluator was the weakest container.** The agent's container had
+no network, but the official SWE-bench evaluator — which executes the agent's
+patch to score it — ran with the network on and *added* CAP_SYS_ADMIN. A
+patch could, in principle, fetch the real fix at test time and pass. Now every
+container that runs the agent's code (workspace, `check` grader, evaluator)
+has one profile, `marcopolo.sandbox`: no network, `--cap-drop ALL`,
+`no-new-privileges`, 4096 processes, 8 GB. Verified on a live evaluator
+container: NetworkMode none, CapEff 0, `/dev/tcp` to GitHub "Network is
+unreachable".
+
+**The agent now works as the image's `nonroot` user.** It can edit /testbed,
+not the Python env, `/usr/local/bin/check` or system files; `su` fails. Two
+things broke on the way, both silently:
+- git objects written as root by the image's last build step were not
+  writable; the harness's own test commit failed. Root chmods just those
+  (~500 small files; never the pack files).
+- **The agent silently lost the project's Python.** The stock config activates
+  the conda env through `BASH_ENV=/root/.bashrc`, unreadable to `nonroot`; the
+  agent got the bare base interpreter and started `pip install -e .`. Caught
+  by watching the first live run. The activation line now lives in a
+  root-owned, world-readable file; setup refuses to start a run unless the
+  agent's own shell resolves `python` to the testbed env.
+
+**Leak check before every run** (`marcopolo.leakcheck`, 3–8 s): future
+commits in git's object database not in HEAD's history, the exact fixed file
+contents as a git object in any repository on disk, and the fix's distinctive
+lines anywhere on the filesystem. Validated by planting the fix three ways in
+astropy-12907 (a fetched future branch, the fixed blob, a copy in
+site-packages): all three caught; the clean image passes. First version
+flagged SWE-bench's own setup commit: `git log --stdin` with no input shows
+HEAD. A leak parks the run; any other setup failure is now `SetupError`,
+invalid and re-queued (before, a setup crash would have been scored as the
+agent failing).
+
+**End to end:** astropy-12907, rung 4, local vLLM: resolved, 59 turns, 3
+checks, 0 "Permission denied", testbed python throughout.
+
+**Re-verification of all 48 tasks in the sandbox found real leaks.** Four xarray
+tasks (4075, 4966, 6744 and its impossible copy): conda's download cache in
+the image holds **xarray 2025.4.0**, whose source contains each fix; an agent
+could read `/opt/miniconda3/pkgs/xarray-2025.4.0-*/.../rolling.py`. This was
+true of every earlier xarray run, and comes from the SWE-bench images, not our
+harness. The caches (`/opt/miniconda3/pkgs`, `/root/.cache`) are now emptied
+before every run (0.7 s); all four then pass. psf__requests-6028 still leaks:
+its fix is in modern `requests`, vendored by pip and used by conda — excluded
+(frozen_v3, 39 tasks). The matplotlib tasks first failed setup: their build
+folder holds files owned by another uid, which a capability-less root cannot
+chmod; only root-owned files are opened now. Final: 47/48 admitted, the real
+fix resolved by the sandboxed official evaluator on all 39 real tasks, exactly
+the added test failing on all 8 impossible ones. Leak check ≤ 8.5 s.

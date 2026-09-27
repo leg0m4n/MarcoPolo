@@ -35,8 +35,13 @@ while $PY -m marcopolo.schedule can-start; do
   echo "$(ts) [$EXP] start $RUN_ID"
   bash scripts/run_one.sh "$EXP" "$RUN_ID" "$IID" "$COND" "$NF2P" "$DS"
   rc=$?
-  if [ $rc -eq 3 ]; then                   # server died: restart once, retry the run later
+  if [ $rc -eq 3 ]; then                   # invalid (server/API error): not scored, retried later
+    n=$($PY -m marcopolo.runqueue invalid "$EXP" "$RUN_ID")
+    [ "$n" -ge 3 ] && echo "$(ts) PARKED $RUN_ID after $n infrastructure failures: needs a human"
     bash scripts/vllm_ctl.sh stop; bash scripts/vllm_ctl.sh start || break
+  elif [ $rc -eq 7 ]; then                 # the fix is findable in the task's container: never retried
+    $PY -m marcopolo.runqueue park "$EXP" "$RUN_ID" >/dev/null
+    echo "$(ts) PARKED $RUN_ID: the task's real fix is findable in its container (leak_check in final.json)"
   fi
   # last run of this task done: remove its image if we pulled it
   if [ "$($PY -m marcopolo.runqueue pending-for "$EXP" "$IID")" = 0 ]; then

@@ -36,3 +36,20 @@ def test_queue_is_never_overwritten(tmp_path, monkeypatch):
     except SystemExit:
         return
     raise AssertionError("rebuilding a queue must refuse")
+
+
+def test_run_failing_for_infrastructure_is_parked_not_retried_forever(tmp_path, monkeypatch):
+    _setup(tmp_path, monkeypatch)
+    first = rq.pending("exp")[0]["run_id"]
+    for _ in range(rq.MAX_INVALID - 1):
+        rq.record_invalid("exp", first)
+    assert rq.pending("exp")[0]["run_id"] == first, "still retried"
+    rq.record_invalid("exp", first)
+    assert first not in [r["run_id"] for r in rq.pending("exp")], "parked after the limit"
+
+
+def test_leaking_task_is_parked_at_once(tmp_path, monkeypatch):
+    _setup(tmp_path, monkeypatch)
+    first = rq.pending("exp")[0]["run_id"]
+    rq.park("exp", first)
+    assert first not in [r["run_id"] for r in rq.pending("exp")]

@@ -15,7 +15,9 @@ When a command runs `check`, BEFORE executing it the harness:
   4. renders the result at this run's rung, and writes it + an exit code into
      the agent's container for the `check` script to print
 
-The grader has pytest; the agent does not; neither has network. The grader runs
+Both containers use marcopolo.sandbox's profile (no network, no kernel
+privileges); the agent works as an unprivileged user. The grader has pytest;
+the agent does not. The grader runs
 the tests as they are in the agent's workspace — edits included — as a real repo
 would. Scoring later uses the original test files (patches.py).
 """
@@ -29,6 +31,7 @@ from pathlib import Path
 
 from marcopolo.check import parse
 from marcopolo.rungs import RUNGS, render
+from marcopolo.sandbox import AGENT_USER, HARDEN
 
 ACT = "source /opt/miniconda3/bin/activate testbed"
 # `check` in command position: start, or after ; && || | ( $( — not `grep check`
@@ -46,8 +49,10 @@ def _run(args, input=None, timeout=900):
     return subprocess.run(args, input=input, capture_output=True, text=True, timeout=timeout)
 
 
-def dexec(container, script, input=None, timeout=900):
-    return _run(["docker", "exec", "-i", "-w", "/testbed", container, "bash", "-c", script], input, timeout)
+def dexec(container, script, input=None, timeout=900, user=None):
+    """user=None: the container's own user (the agent's is unprivileged, the grader's root)."""
+    u = ["-u", user] if user else []
+    return _run(["docker", "exec", "-i", *u, "-w", "/testbed", container, "bash", "-c", script], input, timeout)
 
 
 def test_files(eval_script: str) -> list[str]:
@@ -61,10 +66,10 @@ def _as_list(v):
     return json.loads(v) if isinstance(v, str) else list(v)
 
 
-def _commit_tests(container, test_patch):
+def _commit_tests(container, test_patch, user=None):
     r = dexec(container, "cat > /tmp/.mp_test.patch && git apply /tmp/.mp_test.patch && git add -A "
                          "&& git -c user.email=mp@local -c user.name=marcopolo commit -qm 'task tests' "
-                         "&& rm -f /tmp/.mp_test.patch", input=test_patch)
+                         "&& rm -f /tmp/.mp_test.patch", input=test_patch, user=user)
     if r.returncode:
         raise RuntimeError(f"could not apply the task's tests: {r.stderr[-300:]}")
 
@@ -84,17 +89,17 @@ class Grader:
         self.log: list[dict] = []
 
     def start(self):
-        r = _run(["docker", "run", "-d", "--network", "none", "-w", "/testbed", self.image, "sleep", "4h"], timeout=600)
+        r = _run(["docker", "run", "-d", *HARDEN, "-w", "/testbed", self.image, "sleep", "4h"], timeout=600)
         if r.returncode:
             raise RuntimeError(f"grader container failed: {r.stderr[-300:]}")
         self.container = r.stdout.strip()
         _commit_tests(self.container, self.test_patch)
 
     def prepare_agent(self, agent_container: str):
-        """Tests in, pytest out, `check` script in place."""
-        _commit_tests(agent_container, self.test_patch)
+        """Tests in (as the agent's user, so it owns what git writes), pytest out, `check` in place (as root)."""
+        _commit_tests(agent_container, self.test_patch, user=AGENT_USER)
         r = dexec(agent_container, f"{ACT} && pip uninstall -y -q pytest >/dev/null 2>&1; "
-                                   "cat > /usr/local/bin/check && chmod +x /usr/local/bin/check", input=SHIM)
+                                   "cat > /usr/local/bin/check && chmod +x /usr/local/bin/check", input=SHIM, user="root")
         if r.returncode:
             raise RuntimeError(f"could not prepare agent container: {r.stderr[-300:]}")
 
@@ -110,7 +115,7 @@ class Grader:
     def run_tests(self, agent_container: str):
         """CheckResult for the agent's current code, or None if its changes won't apply."""
         t0 = time.time()
-        diff = dexec(agent_container, SNAPSHOT).stdout
+        diff = dexec(agent_container, SNAPSHOT, user=AGENT_USER).stdout
         # -fd, never -x: ignored files include compiled extensions (astropy's C modules);
         # removing them breaks every import. The base commit already holds whatever
         # was untracked in the image, so -fd removes exactly what a previous check added.
@@ -142,12 +147,12 @@ def intercept(env, grader: Grader):
     def execute(action: dict, cwd: str = "", *, timeout: int | None = None):
         if CHECK_RE.search(action.get("command", "")):
             text, rc = grader.grade(agent)
-            dexec(agent, "cat > /tmp/.mp_check_out", input=text + "\n")
-            dexec(agent, f"echo {rc} > /tmp/.mp_check_rc")
+            dexec(agent, "cat > /tmp/.mp_check_out", input=text + "\n", user=AGENT_USER)
+            dexec(agent, f"echo {rc} > /tmp/.mp_check_rc", user=AGENT_USER)
             try:
                 return original(action, cwd, timeout=timeout)
             finally:
-                dexec(agent, "rm -f /tmp/.mp_check_out /tmp/.mp_check_rc")
+                dexec(agent, "rm -f /tmp/.mp_check_out /tmp/.mp_check_rc", user=AGENT_USER)
         return original(action, cwd, timeout=timeout)
 
     env.execute = execute

@@ -24,7 +24,23 @@ the record.
 
 ### Harness
 - mini-swe-agent 2.4.6, SWE-bench template, one `bash` tool.
-- No network inside agent containers (`--network none`).
+- **Sandbox** *(2026-09-25, `marcopolo.sandbox`)*. Every container that runs
+  the agent's code — its workspace, the `check` grader, and the official
+  evaluator that scores it — has no network, no kernel capabilities
+  (`--cap-drop ALL`; the stock evaluator adds CAP_SYS_ADMIN, removed here),
+  `no-new-privileges`, and process and memory limits. The agent works as the
+  image's unprivileged `nonroot` user: it can edit the repository, not the
+  Python environment or the `check` script. The grader and evaluator stay
+  root, as in the official harness.
+- **Leak check before every run** *(2026-09-25, `marcopolo.leakcheck`)*. Before
+  the agent's first command, package download caches are emptied
+  (`sandbox.sanitize`), then its container is searched for the real fix: commits
+  dated after the base that are not in HEAD's history (reachable or not), the
+  exact fixed file contents as git objects in any repository on disk, and the
+  fix's distinctive lines anywhere on the filesystem. A hit parks the run
+  unscored. The result is recorded in every run's `final.json`.
+- A failure while preparing a run (container, leak check, grader) makes the run
+  invalid and re-queued, never an agent failure.
 - The final repository diff is recorded on every run, however it ends
   (`marcopolo.run_swebench`). The tampering audit reads these.
 
@@ -77,6 +93,14 @@ Plus, per run: turns, generated tokens, largest single turn, truncated turns
   requests 1. The 6 rejections are all environment limits: 5 tasks whose
   tests need the internet, 1 whose regression tests skip on this host's
   reported CPU count (FINDINGS.md).
+- **Frozen: `tasks/frozen_v3.json`, 39 tasks** *(2026-09-25, pending sign-off)*
+  — frozen_v2 re-verified in the final sandbox (`results/preflight_v3.jsonl`:
+  leak check, `check`, and the sandboxed official evaluator on the real fix).
+  **Rule: a task whose real fix is findable in its sanitized container is
+  excluded.** One is: psf__requests-6028, whose fix ships in every modern
+  `requests`, including the copies pip and conda depend on. Package download
+  caches are emptied before every run (xarray images carried xarray 2025.4.0,
+  with the fixes to four tasks). All 8 impossible tasks pass.
 - **Rung collapse** (every rung rendered on each task's unfixed code): rungs 1,
   2 and 3 are distinct on all 40. Rung 4 adds nothing over rung 3 on **3 of 40
   (7.5%)**, each verified genuine: on the two pylint tasks the new tests import

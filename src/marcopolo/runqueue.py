@@ -15,6 +15,8 @@ CLI:
     python -m marcopolo.runqueue next <exp>            # "run_id instance cond n_f2p dataset", exit 1 if done
     python -m marcopolo.runqueue pending-for <exp> <instance_id>
     python -m marcopolo.runqueue stats <exp>
+    python -m marcopolo.runqueue invalid <exp> <run_id>   # count an infrastructure failure
+    python -m marcopolo.runqueue park <exp> <run_id>      # block a run outright
 """
 from __future__ import annotations
 
@@ -49,8 +51,30 @@ def is_done(exp: str, run_id: str) -> bool:
     return (ROOT / exp / "runs" / run_id / "DONE").exists()
 
 
+MAX_INVALID = 3   # infrastructure failures before a run is parked for a human
+
+
+def is_blocked(exp: str, run_id: str) -> bool:
+    f = ROOT / exp / "invalid" / run_id
+    return f.exists() and len(f.read_text().split()) >= MAX_INVALID
+
+
+def record_invalid(exp: str, run_id: str) -> int:
+    d = ROOT / exp / "invalid"
+    d.mkdir(parents=True, exist_ok=True)
+    with (d / run_id).open("a") as f:
+        f.write("x\n")
+    return len((d / run_id).read_text().split())
+
+
+def park(exp: str, run_id: str) -> None:
+    """Block a run outright (its task leaks the answer): no retries."""
+    while record_invalid(exp, run_id) < MAX_INVALID:
+        pass
+
+
 def pending(exp: str) -> list[dict]:
-    return [r for r in runs(exp) if not is_done(exp, r["run_id"])]
+    return [r for r in runs(exp) if not is_done(exp, r["run_id"]) and not is_blocked(exp, r["run_id"])]
 
 
 def _main(argv: list[str]) -> int:
@@ -67,9 +91,17 @@ def _main(argv: list[str]) -> int:
               r.get("dataset", DEFAULT_DATASET))
     elif cmd == "pending-for":
         print(sum(r["instance_id"] == argv[3] for r in pending(exp)))
+    elif cmd == "park":
+        park(exp, argv[3])
+    elif cmd == "invalid":
+        n = record_invalid(exp, argv[3])
+        print(f"{n}")
     elif cmd == "stats":
-        total, left = len(runs(exp)), len(pending(exp))
-        print(f"{exp}: {total - left}/{total} done, {left} pending")
+        rs = runs(exp)
+        done = sum(is_done(exp, r["run_id"]) for r in rs)
+        blocked = sum(is_blocked(exp, r["run_id"]) for r in rs)
+        print(f"{exp}: {done}/{len(rs)} done, {len(rs) - done - blocked} pending"
+              + (f", {blocked} PARKED after {MAX_INVALID} infrastructure failures" if blocked else ""))
     return 0
 
 

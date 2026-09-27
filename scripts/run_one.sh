@@ -3,13 +3,21 @@
 #   bash scripts/run_one.sh <exp> <run_id> <instance_id> <condition> <n_fail_to_pass> [dataset]
 # dataset: a Hugging Face name (default SWE-bench/SWE-bench_Verified) or a local task
 # folder such as tasks/impossible_v1 (the agent loads the folder, the evaluator its test.jsonl)
-# Needs docker access and a live vLLM. Exit 3 = run invalid (server died), not scored.
+# Needs docker access and a live vLLM. Exit 3 = run invalid (server died, setup failed), not
+# scored. Exit 7 = the task's real fix is findable in its container: never scored, parked.
 set -u
 cd /home/avocoral/Documents/MarcoPolo
 export PYTHONPATH="$PWD/src" MSWEA_COST_TRACKING=ignore_errors
 EXP=$1 RUN_ID=$2 IID=$3 COND=$4 NF2P=$5 DS=${6:-SWE-bench/SWE-bench_Verified}
 PY=$PWD/.venv/bin/python
 EVAL_DS=$DS; [ -d "$DS" ] && EVAL_DS="$PWD/$DS/test.jsonl"
+# which model backend: local vLLM (default) or Cohere's hosted API
+MODEL_CONFIG=${MODEL_CONFIG:-configs/north_vllm.yaml}
+HOSTED=0
+case "$MODEL_CONFIG" in *cohere*) HOSTED=1
+  [ -f ~/.config/marcopolo/cohere.env ] || { echo "no ~/.config/marcopolo/cohere.env"; exit 6; }
+  set -a; . ~/.config/marcopolo/cohere.env; set +a ;;
+esac
 RUN=results/$EXP/runs/$RUN_ID
 # image: explicit image_name for local tasks (impossible tasks are renamed), else derived
 if [ -d "$DS" ]; then
@@ -33,14 +41,28 @@ if [ "$COND" != native ]; then
 fi
 t0=$(date +%s)
 $PY -m marcopolo.run_swebench --subset "$DS" --split test --filter "^${IID}\$" -o "$RUN" -w 1 \
-    -c swebench.yaml -c configs/north_vllm.yaml -c configs/pilot_env.yaml "${EXTRA[@]}" >"$RUN/agent.log" 2>&1
+    -c swebench.yaml -c "$MODEL_CONFIG" -c configs/pilot_env.yaml "${EXTRA[@]}" >"$RUN/agent.log" 2>&1
 t1=$(date +%s)
 docker ps -a -q --filter "ancestor=$IMG" | xargs -r docker rm -f >/dev/null 2>&1   # idle agent container
 
-if ! up; then echo "INVALID $RUN_ID: vLLM died during the run"; exit 3; fi
+if [ $HOSTED = 0 ] && ! up; then echo "INVALID $RUN_ID: vLLM died during the run"; exit 3; fi
+# An API/infrastructure error ends the run without the agent having failed: it is
+# invalid and re-queued, never scored. (Context overflow is a pre-registered
+# outcome and IS scored; litellm reports it as ContextWindowExceededError.)
+EXIT_STATUS=$($PY -c "import json,sys
+try: print(json.load(open('$RUN/$IID/$IID.traj.json')).get('info',{}).get('exit_status') or '')
+except Exception: print('NoTrajectory')")
+case "$EXIT_STATUS" in
+  BadRequestError|APIConnectionError|APIError|RateLimitError|Timeout|AuthenticationError|PermissionDeniedError|\
+  NotFoundError|InternalServerError|ServiceUnavailableError|NoTrajectory|SetupError)
+    echo "INVALID $RUN_ID: infrastructure error ($EXIT_STATUS), not scored"; exit 3 ;;
+  TaskLeak)
+    echo "LEAK $RUN_ID: the real fix is findable in the container, not scored"; exit 7 ;;
+esac
 
 # primary policy: the submitted patch
-( cd "$RUN" && $PY -m swebench.harness.run_evaluation -d "$EVAL_DS" -s test -i "$IID" \
+# the official evaluator, in the same sandbox as the agent (marcopolo.evaluate)
+( cd "$RUN" && $PY -m marcopolo.evaluate -d "$EVAL_DS" -s test -i "$IID" \
     -p preds.json -id submitted --max_workers 1 >eval_submitted.log 2>&1 )
 # secondary policy: final repository state. Evaluated separately unless it makes
 # the same change as the submitted patch (the agent picks which files it submits).
@@ -55,7 +77,7 @@ json.dump({'final_equals_submitted': same, 'final_empty': not fin.strip()}, open
 print('1' if same else '0')")
 if [ "$SAME" = 0 ] && [ -s "$FINAL" ]; then
   $PY -c "import json;json.dump({'$IID':{'instance_id':'$IID','model_name_or_path':'final-state','model_patch':open('$FINAL').read()}},open('$RUN/final_preds.json','w'))"
-  ( cd "$RUN" && $PY -m swebench.harness.run_evaluation -d "$EVAL_DS" -s test -i "$IID" \
+  ( cd "$RUN" && $PY -m marcopolo.evaluate -d "$EVAL_DS" -s test -i "$IID" \
       -p final_preds.json -id final --max_workers 1 >eval_final.log 2>&1 )
 fi
 t2=$(date +%s)

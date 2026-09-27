@@ -1,0 +1,17 @@
+# mini-swe-agent against North Mini Code on Cohere's hosted API (full precision,
+# 256K context), via the OpenAI-compatible endpoint.
+#
+# The API key is read ONLY from the COHERE_API_KEY environment variable
+# (scripts/run_one.sh sources ~/.config/marcopolo/cohere.env). Never put it here.
+#
+# model_class is load-bearing: Cohere reads prior-turn reasoning only from
+# `reasoning_content` — the opposite of vLLM (src/marcopolo/models.py).
+model:
+  model_class: "marcopolo.models.NorthCohereModel"
+  model_name: "openai/north-mini-code-1-0"
+  cost_tracking: "ignore_errors"
+  model_kwargs:
+    api_base: "https://api.cohere.ai/compatibility/v1"
+    temperature: 1.0     # Cohere's own eval settings, per the research plan
+    top_p: 0.95
+    max_tokens: 4096

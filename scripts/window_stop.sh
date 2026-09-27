@@ -5,7 +5,7 @@
 cd /home/avocoral/Documents/MarcoPolo
 docker ps >/dev/null 2>&1 || exec sg docker -c "bash $0"
 pkill -f "scripts/run_window.sh"; pkill -f "scripts/run_one.sh"
-pkill -f "marcopolo.run_swebench"; pkill -f "swebench.harness.run_evaluation"
+pkill -f "marcopolo.run_swebench"; pkill -f "marcopolo.evaluate"; pkill -f "swebench.harness.run_evaluation"
 docker ps -a --format '{{.ID}} {{.Image}}' | awk '$2 ~ /swebench\/sweb\.eval/ {print $1}' | xargs -r docker rm -f >/dev/null 2>&1
 bash scripts/vllm_ctl.sh stop
 echo "$(date '+%F %T') hard stop at window close"

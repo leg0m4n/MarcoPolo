@@ -5,10 +5,16 @@ prepared agent container, and the gold patch applied inside the agent container
 the way an agent would edit files. So it validates `check` itself, per task, and
 records every rung's output on the unfixed code (the rung-collapse diagnostic).
 
-A task is admitted only if, with NO network (the agent's and grader's condition):
+Containers are exactly a real run's (marcopolo.sandbox: no network, no kernel
+privileges, agent as an unprivileged user). A task is admitted only if:
+  leak check   : the real fix is not findable in the agent's container
   unfixed code : every FAIL_TO_PASS test fails
   gold patch   : every FAIL_TO_PASS test passes, no PASS_TO_PASS test fails
   pytest removed from the agent's environment, the package still imports
+  official     : the sandboxed official evaluator (marcopolo.evaluate) resolves
+                 the gold patch
+Impossible tasks invert this for their added test: the gold patch must pass
+every original target test and fail the added one, and must NOT resolve.
 
 Why: a target test that needs the internet fails whatever the agent does (found
 on psf__requests-1724: 0/6 target tests pass even with the real fix), and a
@@ -18,6 +24,9 @@ CPU and Docker only, no GPU, so it may run outside the GPU window. Pulls,
 tests and deletes one image at a time (all 46 at once would need ~150 GB).
 
     python scripts/preflight.py [tasks/candidates_v2.json] [results/preflight_v2.jsonl]
+    python scripts/preflight.py tasks/frozen_v2.json,tasks/impossible_v1 results/preflight_v3.jsonl
+
+A folder is a local task set (its test.jsonl); a .json file lists SWE-bench Verified tasks.
 """
 import json
 import subprocess
@@ -28,7 +37,8 @@ from pathlib import Path
 
 from datasets import load_dataset
 
-CANDIDATES = Path(sys.argv[1] if len(sys.argv) > 1 else "tasks/candidates_v2.json")
+ROOT = Path(__file__).resolve().parents[1]
+CANDIDATES = sys.argv[1] if len(sys.argv) > 1 else "tasks/candidates_v2.json"
 OUT = Path(sys.argv[2] if len(sys.argv) > 2 else "results/preflight_v2.jsonl")
 PKG = {"astropy/astropy": "astropy", "matplotlib/matplotlib": "matplotlib", "sphinx-doc/sphinx": "sphinx",
        "pydata/xarray": "xarray", "scikit-learn/scikit-learn": "sklearn", "psf/requests": "requests",
@@ -81,31 +91,57 @@ def put(c, text, dest):
     Path(f.name).unlink()
 
 
-def check_task(t, row):
+def official(iid, patch, dataset):
+    """The sandboxed official evaluator on `patch`: its report for this instance."""
+    d = ROOT / "results" / "preflight_eval" / iid
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "preds.json").write_text(json.dumps({iid: {"instance_id": iid, "model_name_or_path": "gold",
+                                                    "model_patch": patch}}))
+    r = subprocess.run([sys.executable, "-m", "marcopolo.evaluate", "-d", dataset, "-s", "test", "-i", iid,
+                        "-p", "preds.json", "-id", "preflight", "--max_workers", "1"], cwd=d, capture_output=True,
+                       text=True, timeout=3600, env={**__import__("os").environ, "PYTHONPATH": str(ROOT / "src")})
+    rep = d / "logs" / "run_evaluation" / "preflight" / "gold" / iid / "report.json"
+    if not rep.exists():
+        return {"error": (r.stdout + r.stderr)[-300:]}
+    return json.loads(rep.read_text())[iid]
+
+
+def check_task(t, row, dataset):
     """Validate the task through the real `check` machinery, as an agent would meet it."""
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    sys.path.insert(0, str(ROOT / "src"))
+    from marcopolo import leakcheck, sandbox
     from marcopolo.grader import ACT as GACT, Grader, dexec as gexec
     from marcopolo.rungs import RUNGS, render
 
     img = "docker.io/" + t["image"]
     L = lambda v: json.loads(v) if isinstance(v, str) else list(v)
     f2p, p2p = set(L(row["FAIL_TO_PASS"])), set(L(row["PASS_TO_PASS"]))
-    rec = {"instance_id": t["instance_id"], "repo": t["repo"], "n_f2p": len(f2p), "n_p2p": len(p2p)}
+    impossible = set(L(row.get("impossible_new_tests") or "[]"))   # must fail even with the real fix
+    rec = {"instance_id": t["instance_id"], "repo": t["repo"], "n_f2p": len(f2p), "n_p2p": len(p2p),
+           "impossible": bool(impossible)}
     pre = sh("docker", "image", "inspect", img).returncode == 0
     t0 = time.time()
     if not pre and sh("docker", "pull", "-q", img, timeout=3600).returncode != 0:
         return {**rec, "admitted": False, "reason": "pull failed"}
     rec["pull_s"] = round(time.time() - t0)
-    agent = sh("docker", "run", "-d", "--network", "none", "-w", "/testbed", img, "sleep", "3600", check=True).stdout.strip()
+    agent = sh("docker", "run", "-d", *sandbox.AGENT_RUN_ARGS, "-w", "/testbed", img, "sleep", "3600",
+               check=True).stdout.strip()
     g = Grader(row, "trace", img)
     try:
+        t0 = time.time()
+        sandbox.sanitize(agent)
+        leak = leakcheck.check(agent, row)
+        rec["leak_check"] = {**leak, "seconds": round(time.time() - t0, 1)}
+        if leak["leak"]:
+            return {**rec, "admitted": False, "reason": "LEAK: the real fix is findable in the container"}
+        sandbox.prepare_user(agent)
         g.start()
         g.prepare_agent(agent)                       # tests committed, pytest removed, check installed
         rec["test_files"] = g.files
 
         base = g.run_tests(agent)
         failing = {f["test"] for f in base.failures}
-        rec["base_f2p_failing"] = len(f2p & failing)
+        rec["base_f2p_failing"] = len((f2p - impossible) & failing)
         rec["base_p2p_failing"] = len(p2p & failing)
         rec["check_seconds"] = g.log[-1]["seconds"]
         # rung collapse: what each rung shows on the unfixed code
@@ -121,7 +157,8 @@ def check_task(t, row):
         if gold is None:
             return {**rec, "admitted": False, "reason": "HARNESS: grader could not apply the agent-side diff"}
         gfail = {f["test"] for f in gold.failures}
-        rec["gold_f2p_passing"] = len(f2p - gfail)
+        rec["gold_f2p_passing"] = len((f2p - impossible) - gfail)
+        rec["gold_impossible_failing"] = len(impossible & gfail)
         rec["gold_p2p_failing"] = sorted(p2p & gfail)[:10]
         n_gold_p2p_failing = len(p2p & gfail)
 
@@ -142,10 +179,24 @@ def check_task(t, row):
             rec["regression_tests_not_run_here"] = env_skipped[:10]
             reasons.append(f"{len(env_skipped)} regression tests do not run in this environment (skipped or absent)")
             n_gold_p2p_failing -= len(env_skipped)
-        if rec["base_f2p_failing"] != len(f2p): reasons.append(f"{len(f2p) - rec['base_f2p_failing']} target tests already pass unfixed")
-        if rec["gold_f2p_passing"] != len(f2p): reasons.append(f"only {rec['gold_f2p_passing']}/{len(f2p)} target tests pass with the real fix")
+        n_real = len(f2p - impossible)
+        if rec["base_f2p_failing"] != n_real: reasons.append(f"{n_real - rec['base_f2p_failing']} target tests already pass unfixed")
+        if rec["gold_f2p_passing"] != n_real: reasons.append(f"only {rec['gold_f2p_passing']}/{n_real} target tests pass with the real fix")
+        if rec["gold_impossible_failing"] != len(impossible): reasons.append("the added contradictory test passes with the real fix")
         if n_gold_p2p_failing: reasons.append(f"{n_gold_p2p_failing} regression tests fail with the real fix")
         if not rec["imports_without_pytest"]: reasons.append(f"{pkg} needs pytest to import")
+
+        ev = official(t["instance_id"], row["patch"], dataset)
+        st = ev.get("tests_status", {})
+        rec["official"] = {"resolved": ev.get("resolved"), "error": ev.get("error"),
+                           "f2p_failing": st.get("FAIL_TO_PASS", {}).get("failure", []),
+                           "p2p_failing": st.get("PASS_TO_PASS", {}).get("failure", [])}
+        if impossible:
+            ok = (ev.get("resolved") is False and set(rec["official"]["f2p_failing"]) == impossible
+                  and not rec["official"]["p2p_failing"])
+            if not ok: reasons.append("official evaluator: not exactly the added test failing")
+        elif ev.get("resolved") is not True:
+            reasons.append(f"official evaluator does not resolve the gold patch: {ev.get('error') or st}"[:300])
         return {**rec, "admitted": not reasons, "reason": "; ".join(reasons) or "ok"}
     finally:
         g.stop()
@@ -154,24 +205,42 @@ def check_task(t, row):
             sh("docker", "rmi", img)
 
 
+def load(sources):
+    """[(task, row, dataset)] from a comma-separated list of task files and local task folders."""
+    out, verified = [], None
+    for src in sources.split(","):
+        p = ROOT / src
+        if p.is_dir():
+            for line in (p / "test.jsonl").read_text().splitlines():
+                row = json.loads(line)
+                t = {"instance_id": row["instance_id"], "repo": row["repo"],
+                     "image": row["image_name"].removeprefix("docker.io/")}
+                out.append((t, row, str(p / "test.jsonl")))
+        else:
+            if verified is None:
+                verified = {r["instance_id"]: r for r in load_dataset("SWE-bench/SWE-bench_Verified", split="test")}
+            for t in json.loads(p.read_text())["tasks"]:
+                out.append((t, verified[t["instance_id"]], "SWE-bench/SWE-bench_Verified"))
+    return out
+
+
 def main():
-    tasks = json.loads(CANDIDATES.read_text())["tasks"]
-    rows = {r["instance_id"]: r for r in load_dataset("SWE-bench/SWE-bench_Verified", split="test")}
+    items = load(CANDIDATES)
     done = {json.loads(l)["instance_id"] for l in OUT.read_text().splitlines()} if OUT.exists() else set()
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    for i, t in enumerate(tasks, 1):
+    for i, (t, row, dataset) in enumerate(items, 1):
         if t["instance_id"] in done:
             continue
         t0 = time.time()
         try:
-            rec = check_task(t, rows[t["instance_id"]])
+            rec = check_task(t, row, dataset)
         except Exception as e:
             rec = {"instance_id": t["instance_id"], "repo": t["repo"], "admitted": False,
                    "reason": f"preflight error: {type(e).__name__}: {e}"[:300]}
         rec["wall_s"] = round(time.time() - t0)
         with OUT.open("a") as f:
             f.write(json.dumps(rec) + "\n")
-        print(f"[{i}/{len(tasks)}] {'ADMIT' if rec['admitted'] else 'reject'} {t['instance_id']:36} "
+        print(f"[{i}/{len(items)}] {'ADMIT' if rec['admitted'] else 'reject'} {t['instance_id']:36} "
               f"{rec['wall_s']:>4}s  {rec['reason']}", flush=True)
 
 

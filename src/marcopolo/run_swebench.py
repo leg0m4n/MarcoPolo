@@ -6,8 +6,14 @@ any other way — most often the context window filling, which happened on the
 first two pilot tasks — the container is deleted and every edit the agent made
 is lost, unseen. The audit is blind exactly where it matters.
 
+It also enforces the sandbox and checks the task before the agent starts:
+  - the agent's container gets marcopolo.sandbox's profile whatever the config says
+  - marcopolo.leakcheck looks for the real fix inside it (TaskLeak: run parked)
+  - any failure while preparing the container is a SetupError: the run is
+    invalid and retried, never scored as the agent failing
+
 This wraps two module functions rather than copying the runner:
-  - get_sb_environment: remember each instance's live environment
+  - get_sb_environment: sandbox, leak check, grader; remember the live environment
   - update_preds_file:  called in the runner's `finally`, after the trajectory
     is saved and before the container is torn down — capture the diff there
 
@@ -26,6 +32,8 @@ from pathlib import Path
 
 from minisweagent.run.benchmarks import swebench as sb
 
+from marcopolo import leakcheck, sandbox
+from marcopolo.leakcheck import TaskLeak
 from marcopolo.patches import files_in, scorable_final, split_patch
 
 # `git add -A` so new, untracked files are included; the container is discarded
@@ -35,6 +43,7 @@ FINAL_DIFF_CMD = "cd /testbed && git add -A >/dev/null 2>&1 && git diff --cached
 _envs: dict[str, object] = {}
 _instances: dict[str, dict] = {}
 _graders: dict[str, object] = {}
+_leaks: dict[str, dict] = {}
 _lock = threading.Lock()
 
 
@@ -49,22 +58,39 @@ def capture_final_diff(env) -> tuple[str | None, str]:
     return out.get("output", ""), "ok"
 
 
+class SetupError(RuntimeError):
+    """Preparing the run failed; the agent never started. The run is invalid, not failed."""
+
+
 def _wrap_get_env(original):
     def get_sb_environment(config, instance):
-        env = original(config, instance)
+        envc = config.get("environment", {})
+        config = {**config, "environment": {**envc, "run_args": list(sandbox.AGENT_RUN_ARGS),
+                                            "env": {**envc.get("env", {}), "BASH_ENV": sandbox.BASH_ENV}}}
         iid = instance["instance_id"]
         rung = (config.get("marcopolo") or {}).get("rung")
         grader = None
-        if rung:                                   # an experiment condition: feedback only via `check`
-            from marcopolo.grader import Grader, intercept
-            grader = Grader(instance, rung, env.config.image)
-            try:
+        try:
+            env = original(config, instance)
+            sandbox.sanitize(env.container_id)
+            report = leakcheck.check(env.container_id, instance)     # before the agent's first command
+            with _lock:
+                _leaks[iid] = report
+            if report["leak"]:
+                raise TaskLeak("the real fix is findable in the container; see leak_check in final.json")
+            sandbox.prepare_user(env.container_id)
+            if rung:                               # an experiment condition: feedback only via `check`
+                from marcopolo.grader import Grader, intercept
+                grader = Grader(instance, rung, env.config.image)
                 grader.start()
                 grader.prepare_agent(env.container_id)
-            except Exception:
+                intercept(env, grader)
+        except TaskLeak:
+            raise
+        except Exception as e:
+            if grader:
                 grader.stop()
-                raise
-            intercept(env, grader)
+            raise SetupError(f"{type(e).__name__}: {e}") from e
         with _lock:
             _envs[iid], _instances[iid] = env, instance
             if grader:
@@ -79,6 +105,7 @@ def _wrap_update_preds(original):
             env = _envs.pop(instance_id, None)
             instance = _instances.pop(instance_id, None) or {}
             grader = _graders.pop(instance_id, None)
+            leak = _leaks.pop(instance_id, None)
         instance_dir = Path(output_path).parent / instance_id
         instance_dir.mkdir(parents=True, exist_ok=True)
         task_tests = set(files_in(instance.get("test_patch", "")))
@@ -111,6 +138,7 @@ def _wrap_update_preds(original):
             "submitted_test_file_changes": files_in(test_part),
             "rung": grader.rung if grader else None,
             "checks": len(grader.log) if grader else None,
+            "leak_check": leak,
         }, indent=2), encoding="utf-8")
         return original(output_path, instance_id, model_name, scored)
     return update_preds_file
