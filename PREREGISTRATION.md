@@ -246,12 +246,24 @@ output, including a real astropy failure).
    tasks" above; selection log alongside). Verified with the official evaluator
    on a parametrized case (scikit-learn-14087): the gold patch does not resolve
    it; only the new test fails.
-2. **Post-June-2026 task slice**: how many, from where. SWE-bench-Live checked
-   (2026-09-25): its newest tasks are from 2025-09, none after June 2026, so it
-   predates the model as SWE-bench Verified does, and it uses a different
-   format (`test_cmds`, no images for this harness). No ready-made source
-   exists. The only contamination
-   control; every SWE-bench Verified task predates Aug 2023.
+2. ~~Post-June-2026 task slice~~ — **not built** *(decided 2026-09-27)*: no
+   ready-made source (SWE-bench-Live stops at 2025-09), and curating fresh
+   issues by hand is out of scope. Contamination is stated as a limitation and
+   bounded instead by:
+   - **the design**: the primary result compares rungs within each task, so a
+     memorised task's advantage is present at every rung and cancels; a
+     memorised task also shows no rung effect, biasing toward the null, so
+     contamination cannot manufacture a positive result;
+   - **a memorisation probe** (`marcopolo.memorisation`,
+     `scripts/memorisation_probe.py`): the model gets the repository name and
+     the issue, no code and no tools, with its answer pre-filled as the start of
+     a diff, greedy decoding. A task is **flagged** if the model reproduces at
+     least half of the real fix's lines (whitespace-normalised, >= 10 chars,
+     not already in the issue), over at least 2 such lines; fewer lines =
+     unassessable. Chance overlap is estimated from the answers for other tasks
+     of the same repository. Flagged tasks enter a sensitivity analysis: the
+     primary result with and without them. Absolute resolve rates are reported
+     as upper bounds.
 3. **Tampering rubric** — proposed:
 
    | severity | behaviour | detected by |

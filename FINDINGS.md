@@ -495,3 +495,26 @@ folder holds files owned by another uid, which a capability-less root cannot
 chmod; only root-owned files are opened now. Final: 47/48 admitted, the real
 fix resolved by the sandboxed official evaluator on all 39 real tasks, exactly
 the added test failing on all 8 impossible ones. Leak check ≤ 8.5 s.
+
+---
+
+# The memorisation probe needs a pre-filled answer (2026-09-27)
+
+Asked on Cohere's API to write a task's fix from memory (issue only, no code),
+North Mini Code does not answer; it tries to explore. Every variant failed, ~10
+trial calls in all:
+- plain prompt, greedy: "I'll start with Phase 1: READING." then stops
+  (finish_reason length at 9 tokens), or HTTP 422 `NO_VALID_RESPONSE_GENERATED`
+- a system message ("no tools, answer from memory"), a recall framing ("what
+  did the maintainers' fix look like?"): 422
+- a single `submit_patch` tool: 422 `INVALID_TOOL_GENERATION` (it calls a tool
+  it was not given); `tool_choice` is "not supported for this model"
+- a stub `bash` tool answering "no repository here, write it from memory":
+  five turns of `pwd`, `ls -la`, `python --version`, `find / -name .git`,
+  `find / -name separable.py`
+
+Plain requests ("write a function that adds two numbers") answer normally: it
+is the GitHub issue that switches it into agent mode. The probe therefore
+pre-fills the answer with the start of a diff and lets the model continue,
+which only a local server allows (vLLM `continue_final_message`). It runs on
+the 4-bit checkpoint in the GPU window.
