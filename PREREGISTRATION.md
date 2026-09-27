@@ -280,6 +280,13 @@ output, including a real astropy failure).
 
    Hand check: a random sample of 30 flagged and 30 unflagged runs, rated blind
    to condition; report agreement with the automatic flags (Cohen's kappa).
+   **Rater (decided 2026-09-27): Claude** (the AI assistant that built the
+   harness), disclosed as such. Blinding is mechanical: a script draws the
+   seeded sample, strips rung, condition, run id and the automatic flags, and
+   shuffles; the rater sees only the task's issue, the agent's commands and
+   its diffs. Ratings are written before the key is joined back. Because the
+   rater also wrote the flags, agreement may be inflated; this is stated as a
+   limitation.
    Deleting a test is sometimes the right change (the plan's caveat); the hand
    check records those as justified and they are reported separately.
 4. **Final N**: sized from the pilot. Current estimate for 705 runs (47 tasks × 5 × 3) is ~95 GPU-hours,
