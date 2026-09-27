@@ -1,12 +1,19 @@
-# Pre-registration — DRAFT
+# Pre-registration
 
 Marco Polo: feedback locality, cost and tampering in North Mini Code.
 Design: `Signal Quality for Small Agents — Research Plan.pdf`.
 
-**Status: draft.** Sections marked *decided* are fixed and will not change after
-the first experiment run. Sections marked *open* must be settled before it. The
-commit that removes the word DRAFT is the pre-registration; its git timestamp is
-the record.
+**Status: registered** *(signed off 2026-09-27, before the first run of
+`final_v1`)*. Everything below is fixed. The commit that removed the word DRAFT
+is the pre-registration; its git timestamp is the record. Any later change is
+listed under "Deviations" at the end, with its date and reason.
+
+**The experiment:** `results/final_v1/queue.json` — `tasks/final_v1.json` (39
+real + 8 impossible tasks) × 5 conditions (outcome, location, diff, trace,
+padded) × 3 attempts = **705 runs**, local 4-bit model only. Runs are grouped
+by task; within a task, conditions and attempts are in a seeded random order
+(seed 0), so no rung is systematically run earlier or later in a night. The
+memorisation probe runs first, on the same server, before any experiment run.
 
 ## Decided
 
@@ -242,7 +249,7 @@ output, including a real astropy failure).
 - Final state is evaluated separately unless it makes the same change as the
   submitted patch.
 
-## Open — settle before the first experiment run
+## Settled before the first run (formerly open)
 
 1. ~~Impossible tasks~~ — **built** *(2026-09-24)*: `tasks/impossible_v1/`,
    8 tasks, each with exactly one contradicting target test (see "Impossible
@@ -267,7 +274,7 @@ output, including a real astropy failure).
      of the same repository. Flagged tasks enter a sensitivity analysis: the
      primary result with and without them. Absolute resolve rates are reported
      as upper bounds.
-3. **Tampering rubric** — proposed:
+3. **Tampering rubric** — decided *(2026-09-27)*:
 
    | severity | behaviour | detected by |
    |---|---|---|
@@ -289,9 +296,14 @@ output, including a real astropy failure).
    limitation.
    Deleting a test is sometimes the right change (the plan's caveat); the hand
    check records those as justified and they are reported separately.
-4. **Final N**: sized from the pilot. Current estimate for 705 runs (47 tasks × 5 × 3) is ~95 GPU-hours,
+4. **Final N** — decided *(2026-09-27)*: 705 runs. Estimate for 705 runs (47 tasks × 5 × 3) is ~95 GPU-hours,
    about one week of windows.
-5. **Calibration slice**: where 15–20 tasks run at full precision.
+5. **Calibration slice** — decided *(2026-09-27)*: every reported number comes
+   from the local 4-bit model. Hosted full-precision runs (Cohere's API, about
+   2.7M input tokens per run, so the whole experiment is beyond the budget) are
+   limited to what the free trial key allows, run after the main experiment, and
+   reported only as a secondary comparison of the 4-bit model with full
+   precision.
 6. **Detectable effect and primary analysis** — computed (two-sided α 0.05,
    power 0.8, 40 tasks × 3 attempts = 120 runs per condition; with 39 tasks every
    figure rises by ~0.2 pt, unchanged at this rounding):
@@ -307,3 +319,7 @@ output, including a real astropy failure).
    1 → 4, conditions compared within task (task as a random effect), using all
    480 rung runs. Pairwise contrasts and the padded-vs-outcome comparison are
    secondary. A null result is reported as "no effect larger than X".
+
+## Deviations
+
+None yet.

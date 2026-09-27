@@ -7,13 +7,17 @@ A run without DONE is pending, including one killed mid-way at the window's
 close. run_one.sh wipes a pending run's directory before starting, so a
 re-queued run never inherits a half-finished predecessor.
 
-Runs are ordered by task, so each task's Docker image is pulled once and
-deleted after its last run.
+Runs are grouped by task, so each task's Docker image is pulled once and
+deleted after its last run (runs of an impossible task sit next to its source
+task's, which uses the same image). Within a task the order of conditions and
+attempts is shuffled (seeded): a fixed rung order would line up rungs with
+anything that drifts over a night, including the window's hard stop.
 
 CLI:
     python -m marcopolo.runqueue build <exp> <tasks.json> <cond,cond,..> <attempts>
     python -m marcopolo.runqueue next <exp>            # "run_id instance cond n_f2p dataset", exit 1 if done
     python -m marcopolo.runqueue pending-for <exp> <instance_id>
+    python -m marcopolo.runqueue pending-image <exp> <image>   # pending runs needing this image
     python -m marcopolo.runqueue stats <exp>
     python -m marcopolo.runqueue invalid <exp> <run_id>   # count an infrastructure failure
     python -m marcopolo.runqueue park <exp> <run_id>      # block a run outright
@@ -21,6 +25,7 @@ CLI:
 from __future__ import annotations
 
 import json
+import random
 import sys
 from pathlib import Path
 
@@ -28,18 +33,28 @@ ROOT = Path(__file__).resolve().parents[2] / "results"
 DEFAULT_DATASET = "SWE-bench/SWE-bench_Verified"
 
 
-def build(exp: str, tasks_file: str, conditions: list[str], attempts: int) -> list[dict]:
+def image_of(task: dict) -> str:
+    img = task["image"]
+    return img if img.startswith("docker.io/") else "docker.io/" + img
+
+
+def build(exp: str, tasks_file: str, conditions: list[str], attempts: int, seed: int = 0) -> list[dict]:
     tasks = json.loads(Path(tasks_file).read_text())["tasks"]
-    specs = [{"run_id": f"{t['instance_id']}__{c}__a{a}", "instance_id": t["instance_id"],
-              "condition": c, "attempt": a, "n_fail_to_pass": t["n_fail_to_pass"],
-              "dataset": t.get("dataset", DEFAULT_DATASET)}
-             for t in tasks for c in conditions for a in range(1, attempts + 1)]
+    rng = random.Random(seed)
+    specs = []
+    for t in tasks:
+        runs = [{"run_id": f"{t['instance_id']}__{c}__a{a}", "instance_id": t["instance_id"],
+                 "condition": c, "attempt": a, "n_fail_to_pass": t["n_fail_to_pass"],
+                 "dataset": t.get("dataset", DEFAULT_DATASET), "image": image_of(t)}
+                for c in conditions for a in range(1, attempts + 1)]
+        rng.shuffle(runs)
+        specs += runs
     d = ROOT / exp
     if (d / "queue.json").exists():
         raise SystemExit(f"{d/'queue.json'} exists; refusing to overwrite a pre-registered queue")
     d.mkdir(parents=True, exist_ok=True)
     (d / "queue.json").write_text(json.dumps({"tasks_file": tasks_file, "conditions": conditions,
-                                              "attempts": attempts, "runs": specs}, indent=2))
+                                              "attempts": attempts, "seed": seed, "runs": specs}, indent=2))
     return specs
 
 
@@ -91,6 +106,8 @@ def _main(argv: list[str]) -> int:
               r.get("dataset", DEFAULT_DATASET))
     elif cmd == "pending-for":
         print(sum(r["instance_id"] == argv[3] for r in pending(exp)))
+    elif cmd == "pending-image":
+        print(sum(r.get("image") == argv[3] for r in pending(exp)))
     elif cmd == "park":
         park(exp, argv[3])
     elif cmd == "invalid":

@@ -10,14 +10,32 @@ from marcopolo import runqueue as rq  # noqa: E402
 def _setup(tmp_path, monkeypatch):
     monkeypatch.setattr(rq, "ROOT", tmp_path)
     tf = tmp_path / "tasks.json"
-    tf.write_text(json.dumps({"tasks": [{"instance_id": "a__a-1", "n_fail_to_pass": 2},
-                                        {"instance_id": "b__b-2", "n_fail_to_pass": 3}]}))
+    tf.write_text(json.dumps({"tasks": [
+        {"instance_id": "a__a-1", "n_fail_to_pass": 2, "image": "swebench/img-a:latest"},
+        {"instance_id": "a__a-1__impossible", "n_fail_to_pass": 3, "dataset": "tasks/imp",
+         "image": "docker.io/swebench/img-a:latest"},
+        {"instance_id": "b__b-2", "n_fail_to_pass": 3, "image": "swebench/img-b:latest"}]}))
     return rq.build("exp", str(tf), ["rung1", "rung2"], 2)
 
 
 def test_ordered_by_task_so_images_are_reused(tmp_path, monkeypatch):
     specs = _setup(tmp_path, monkeypatch)
-    assert [s["instance_id"] for s in specs] == ["a__a-1"] * 4 + ["b__b-2"] * 4
+    assert [s["instance_id"] for s in specs] == ["a__a-1"] * 4 + ["a__a-1__impossible"] * 4 + ["b__b-2"] * 4
+
+
+def test_impossible_task_shares_its_source_image(tmp_path, monkeypatch):
+    specs = _setup(tmp_path, monkeypatch)
+    imgs = {s["instance_id"]: s["image"] for s in specs}
+    assert imgs["a__a-1"] == imgs["a__a-1__impossible"] == "docker.io/swebench/img-a:latest"
+    assert rq._main(["x", "pending-image", "exp", "docker.io/swebench/img-a:latest"]) == 0
+
+
+def test_rung_order_is_shuffled_within_task_and_reproducible(tmp_path, monkeypatch):
+    specs = _setup(tmp_path, monkeypatch)
+    orders = {tuple(s["condition"] for s in specs if s["instance_id"] == t) for t in ("a__a-1", "a__a-1__impossible", "b__b-2")}
+    assert len(orders) > 1, "not the same fixed order for every task"
+    again = [s["run_id"] for s in rq.build("exp2", str(tmp_path / "tasks.json"), ["rung1", "rung2"], 2)]
+    assert again == [s["run_id"] for s in specs], "same seed, same queue"
 
 
 def test_run_without_done_stays_pending(tmp_path, monkeypatch):

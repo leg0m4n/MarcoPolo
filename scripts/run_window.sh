@@ -43,9 +43,9 @@ while $PY -m marcopolo.schedule can-start; do
     $PY -m marcopolo.runqueue park "$EXP" "$RUN_ID" >/dev/null
     echo "$(ts) PARKED $RUN_ID: the task's real fix is findable in its container (leak_check in final.json)"
   fi
-  # last run of this task done: remove its image if we pulled it
-  if [ "$($PY -m marcopolo.runqueue pending-for "$EXP" "$IID")" = 0 ]; then
-    lid=${IID,,}; img="docker.io/swebench/sweb.eval.x86_64.${lid//__/_1776_}:latest"
+  # no pending run needs this image any more: remove it if we pulled it
+  img=$($PY -c "import json,sys;print(next(r.get('image','') for r in json.load(open('results/$EXP/queue.json'))['runs'] if r['run_id']=='$RUN_ID'))")
+  if [ -n "$img" ] && [ "$($PY -m marcopolo.runqueue pending-image "$EXP" "$img")" = 0 ]; then
     grep -qxF "$img" "results/$EXP/pulled_images" 2>/dev/null && docker rmi "$img" >/dev/null 2>&1
   fi
 done

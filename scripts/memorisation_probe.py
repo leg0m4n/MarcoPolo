@@ -23,7 +23,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from datasets import load_dataset
-from openai import OpenAI
+from openai import BadRequestError, OpenAI
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -67,7 +67,9 @@ for i, iid in enumerate(tasks, 1):
                 messages=[{"role": "user", "content": prompt}, {"role": "assistant", "content": PREFILL}],
                 extra_body={"continue_final_message": True, "add_generation_prompt": False})
             break
-        except Exception as e:            # rate limit / transient: back off, then give up on this task
+        except BadRequestError as e:      # the request itself is wrong (e.g. pre-fill unsupported): stop
+            raise SystemExit(f"{iid}: request rejected, not retrying: {str(e)[:300]}")
+        except Exception as e:            # transient: back off, then give up on this task
             print(f"  {iid}: {type(e).__name__}, retry {attempt + 1}", flush=True)
             time.sleep(30 * (attempt + 1))
     else:

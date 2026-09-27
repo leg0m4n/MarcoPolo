@@ -1,4 +1,4 @@
-# Marco Polo — design summary for sign-off
+# Marco Polo — design summary (signed off 2026-09-27)
 
 *Two pages. The full record is `PREREGISTRATION.md`; evidence is in `FINDINGS.md`.*
 
@@ -65,11 +65,12 @@ varying only the feedback.
 Each of these would have produced a fake rung effect or corrupted results; each is fixed and guarded by a test.
 Stock harness **dropped the model's reasoning every turn** · reasoning **exhausted `max_tokens`**, truncating richer rungs more · rung 4 **collapsed into rung 3** on value bugs · **coloured output** silently blanked rungs 3–4 on 8 tasks · **network-dependent** tests made tasks unwinnable · SWE-bench's **truncated test ids** broke matching · padding filler was **misleading**, not neutral.
 
-## Still open
+## Settled at sign-off
 
-1. **Contamination control** (post-June-2026 tasks): no ready source; build a few, or state as a limitation.
-2. **Tampering spot-check rater**: you, or me.
-3. **Calibration** (full-precision vs our 4-bit) — and possibly **where the whole experiment runs**: see the reply.
+1. **Contamination**: stated as a limitation; bounded by the within-task design and the memorisation probe.
+2. **Tampering spot-check rater**: Claude, blinded by script; disclosed.
+3. **Where it runs**: everything on the local 4-bit model. Full precision (Cohere's API) only as a small, secondary calibration on the free trial key.
+4. **Run order**: shuffled within each task (seeded), so no rung always runs first or last in a night.
 
 ## Reading list
 
