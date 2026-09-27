@@ -87,20 +87,23 @@ Plus, per run: turns, generated tokens, largest single turn, truncated turns
   the gold patch, `check` reports every target test passing; without it, the
   target tests fail. Supersedes `tasks/frozen_v1.json`, which no experiment run
   used.
-- **Frozen: `tasks/frozen_v2.json`, 40 tasks** *(2026-09-24)* — every
+- *Superseded by frozen_v3 below.* **Frozen: `tasks/frozen_v2.json`, 40 tasks** *(2026-09-24)* — every
   pre-flight admit (cap 10 per repository, not binding): matplotlib 10,
   sphinx 7, astropy 6, xarray 6, scikit-learn 6, seaborn 2, pylint 2,
   requests 1. The 6 rejections are all environment limits: 5 tasks whose
   tests need the internet, 1 whose regression tests skip on this host's
   reported CPU count (FINDINGS.md).
-- **Frozen: `tasks/frozen_v3.json`, 39 tasks** *(2026-09-25, pending sign-off)*
+- **Frozen: `tasks/frozen_v3.json`, 39 tasks** *(2026-09-25, signed off 2026-09-27)*
   — frozen_v2 re-verified in the final sandbox (`results/preflight_v3.jsonl`:
   leak check, `check`, and the sandboxed official evaluator on the real fix).
   **Rule: a task whose real fix is findable in its sanitized container is
   excluded.** One is: psf__requests-6028, whose fix ships in every modern
   `requests`, including the copies pip and conda depend on. Package download
   caches are emptied before every run (xarray images carried xarray 2025.4.0,
-  with the fixes to four tasks). All 8 impossible tasks pass.
+  with the fixes to four tasks). All 8 impossible tasks pass. **Not replaced**:
+  the pool is exhausted (all 46 tasks meeting the rules were tried; the only
+  other ≥2-target-test task is rated > 4 h), and relaxing a rule to fill the
+  slot would cost more than one task's worth of power (~2.5% of pairs).
 - **Rung collapse** (every rung rendered on each task's unfixed code): rungs 1,
   2 and 3 are distinct on all 40. Rung 4 adds nothing over rung 3 on **3 of 40
   (7.5%)**, each verified genuine: on the two pylint tasks the new tests import
@@ -279,11 +282,12 @@ output, including a real astropy failure).
    to condition; report agreement with the automatic flags (Cohen's kappa).
    Deleting a test is sometimes the right change (the plan's caveat); the hand
    check records those as justified and they are reported separately.
-4. **Final N**: sized from the pilot. Current estimate for 720 runs is ~97 GPU-hours,
+4. **Final N**: sized from the pilot. Current estimate for 705 runs (47 tasks × 5 × 3) is ~95 GPU-hours,
    about one week of windows.
 5. **Calibration slice**: where 15–20 tasks run at full precision.
 6. **Detectable effect and primary analysis** — computed (two-sided α 0.05,
-   power 0.8, 40 tasks × 3 attempts = 120 runs per condition):
+   power 0.8, 40 tasks × 3 attempts = 120 runs per condition; with 39 tasks every
+   figure rises by ~0.2 pt, unchanged at this rounding):
 
    | baseline resolve rate | runs independent | attempts correlated (ICC 0.3) |
    |---|---|---|

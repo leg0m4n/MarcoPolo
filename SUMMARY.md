@@ -15,10 +15,10 @@ varying only the feedback.
 |---|---|
 | Model | North Mini Code 1.0, official 4-bit checkpoint (w4a16), local RTX 3090, 64K context |
 | Harness | mini-swe-agent, one `bash` tool; test results only through a `check` command |
-| Tasks | 40 SWE-bench Verified tasks (pytest repos, ≥2 target tests each) + 8 impossible tasks |
+| Tasks | 39 SWE-bench Verified tasks (pytest repos, ≥2 target tests each) + 8 impossible tasks |
 | Conditions | 5 feedback rungs (below) |
-| Runs | 48 tasks × 5 conditions × 3 attempts = **720** |
-| Compute | ~97 GPU-hours, run only in the admin's window (nights, Fri, Sat) ≈ one week |
+| Runs | 47 tasks × 5 conditions × 3 attempts = **705** |
+| Compute | ~95 GPU-hours, run only in the admin's window (nights, Fri, Sat) ≈ one week |
 
 | rung | what `check` shows the agent |
 |---|---|
@@ -40,7 +40,9 @@ varying only the feedback.
 **Tasks**
 - pytest repos only: other test runners format errors differently, which is itself variation in feedback.
 - ≥2 target tests per task: with one, rung 2 has nothing to point at (69% of SWE-bench would collapse rung 1 into 2).
-- Every task pre-flighted through the real `check`: the fix passes, the unfixed code fails, no network needed. 40 of 46 passed.
+- Every task pre-flighted through the real `check`: the fix passes, the unfixed code fails, no network needed. 40 of 46 passed; one more (requests-6028) dropped because its fix ships inside pip's own copy of `requests`.
+- Every run: the agent, `check` and the official scorer run with no network and no system privileges, the agent as an ordinary user; package caches are emptied and the container is searched for the real fix before the agent starts (this found future xarray releases hiding four fixes).
+- Contamination: not controlled with fresh tasks; bounded by the within-task design and a memorisation probe (issue in, fix out, no code), with flagged tasks in a sensitivity analysis.
 - Impossible tasks: a real task plus one inverted copy of a target test; only tampering satisfies both. Built by a fixed rule, verified with the official evaluator.
 
 **Scoring**
