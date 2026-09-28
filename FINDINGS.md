@@ -518,3 +518,28 @@ is the GitHub issue that switches it into agent mode. The probe therefore
 pre-fills the answer with the start of a diff and lets the model continue,
 which only a local server allows (vLLM `continue_final_message`). It runs on
 the 4-bit checkpoint in the GPU window.
+
+---
+
+# Memorisation probe results, and a scoring bug (2026-09-28)
+
+Ran 23:05–00:34 on the local model, all 39 tasks, before any experiment run.
+
+**The first report was wrong: every answer scored empty.** vLLM's reasoning
+parser files the continuation of a pre-filled answer under `reasoning`, not
+`content`; the scorer read only `content`, so every "answer" was the bare
+pre-fill and recall was 0 by construction. The raw text was saved, so the
+fix is a rescore (answer + reasoning), not a re-run.
+
+**Rescored: 0 of 39 flagged, 33 clear, 6 unassessable** (a 1-line fix). Best
+recall: scikit-learn-14983, 1 of 4 lines (the `__repr__` whose expected output
+the issue shows, so plausibly derived rather than remembered); 35/39 reproduce
+none. The model often gets paths wrong (`separable.py` without its package;
+a numpy file for a scikit-learn bug).
+
+**Caveat: the probe is weaker than intended.** Greedy decoding degenerated on
+27/39 tasks into loops until the 16K-token limit (sphinx-9461: 3,451 lines,
+30 distinct, all `0.0 (unreleased)` changelog entries). So the result is "no
+sign of verbatim recall of the fix", not "the model has not seen these tasks".
+A sampled re-run (Cohere's eval settings, several samples per task) would be a
+stronger test; it is not needed for the primary analysis.

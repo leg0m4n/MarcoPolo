@@ -322,4 +322,7 @@ output, including a real astropy failure).
 
 ## Deviations
 
-None yet.
+- *2026-09-28*, memorisation probe **scoring** (not the rule): the scored text
+  is the answer plus the `reasoning` field, because vLLM files the continuation
+  of a pre-filled answer there; scoring `content` alone scored every task 0.
+  Rescored from the saved responses; no new calls (FINDINGS.md).

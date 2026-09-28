@@ -94,10 +94,15 @@ report = []
 for iid in tasks:
     if iid not in done:
         continue
-    row, ans = rows[iid], done[iid]["answer"]
+    # vLLM's reasoning parser files the continuation of a pre-filled answer under
+    # `reasoning` (found on the first run: every `answer` was the bare pre-fill),
+    # so the scored text is both fields
+    row = rows[iid]
+    ans = done[iid]["answer"] + "\n" + (done[iid].get("reasoning") or "")
     gold = mem.gold_lines(row["patch"], row["problem_statement"])
     r = mem.recall(gold, ans)
-    others = [mem.recall(gold, done[o]["answer"]) for o in by_repo[row["repo"]] if o != iid]
+    others = [mem.recall(gold, done[o]["answer"] + "\n" + (done[o].get("reasoning") or ""))
+              for o in by_repo[row["repo"]] if o != iid]
     others = [x for x in others if x is not None]
     report.append({"instance_id": iid, "gold_lines": len(gold), "recall": r,
                    "chance": round(sum(others) / len(others), 3) if others else None,
