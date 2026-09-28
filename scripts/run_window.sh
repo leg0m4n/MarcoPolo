@@ -17,15 +17,17 @@ next_exp() {   # first listed experiment that still has pending runs
   done < results/ACTIVE_EXPERIMENT
   return 1
 }
+# one-off work for after the experiments (e.g. the sampled memorisation probe)
+post_pending() { [ -f scripts/post_experiment.sh ] && [ ! -f results/post_experiment.done ]; }
 # under tmux sessions older than the docker group, re-enter with the group
 docker ps >/dev/null 2>&1 || exec sg docker -c "bash $0"
 
 exec 9>/tmp/marcopolo_window.lock
 flock -n 9 || exit 0                       # another window runner is active
 $PY -m marcopolo.schedule can-start || exit 0
-EXP=$(next_exp) || exit 0                  # nothing to do
+EXP=$(next_exp) || post_pending || exit 0  # nothing to do
 
-echo "$(ts) window open: $($PY -m marcopolo.schedule status) | $($PY -m marcopolo.runqueue stats $EXP)"
+echo "$(ts) window open: $($PY -m marcopolo.schedule status) | ${EXP:+$($PY -m marcopolo.runqueue stats $EXP)}"
 bash scripts/vllm_ctl.sh start || { echo "$(ts) vLLM would not start; giving up this round"; exit 1; }
 
 while $PY -m marcopolo.schedule can-start; do
@@ -49,6 +51,11 @@ while $PY -m marcopolo.schedule can-start; do
     grep -qxF "$img" "results/$EXP/pulled_images" 2>/dev/null && docker rmi "$img" >/dev/null 2>&1
   fi
 done
+if ! next_exp >/dev/null && post_pending && $PY -m marcopolo.schedule can-start; then
+  echo "$(ts) experiments done: running scripts/post_experiment.sh"
+  bash scripts/post_experiment.sh >> results/post_experiment.log 2>&1 && touch results/post_experiment.done
+  echo "$(ts) post-experiment step: $([ -f results/post_experiment.done ] && echo finished || echo 'not finished, resumes next window')"
+fi
 bash scripts/vllm_ctl.sh stop
 echo "$(ts) window runner exiting"
 while read -r e; do [ -f "results/$e/queue.json" ] && echo "  $($PY -m marcopolo.runqueue stats $e)"; done < results/ACTIVE_EXPERIMENT
