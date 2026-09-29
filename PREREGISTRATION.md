@@ -317,8 +317,21 @@ output, including a real astropy failure).
    A pairwise contrast between two conditions detects only large effects.
    **Primary analysis (decided 2026-09-25):** the trend in resolve rate across rungs
    1 → 4, conditions compared within task (task as a random effect), using all
-   480 rung runs. Pairwise contrasts and the padded-vs-outcome comparison are
+   468 rung runs on the 39 real tasks (was 480 with 40 tasks; impossible tasks
+   serve Leg 3 only). Pairwise contrasts and the padded-vs-outcome comparison are
    secondary. A null result is reported as "no effect larger than X".
+
+   **Secondary: runs that asked for feedback** *(registered 2026-09-29, before
+   any result was examined by condition)*. The same trend analysis, restricted
+   to runs that called `check` at least once. Rationale: on the first night 15
+   of 50 runs never called `check` and so received no feedback at any rung,
+   diluting the comparison. Restricting on this is not conditioning on the
+   treatment: until its first `check`, an agent has seen nothing that differs
+   between conditions (identical prompt and template), so whether it ever calls
+   `check` cannot depend on its rung. Reported alongside the primary, never in
+   place of it, with the share of runs excluded per condition (which should be
+   equal across conditions if the rationale holds; a difference is itself
+   reported).
 
 ## Deviations
 
@@ -326,3 +339,7 @@ output, including a real astropy failure).
   is the answer plus the `reasoning` field, because vLLM files the continuation
   of a pre-filled answer there; scoring `content` alone scored every task 0.
   Rescored from the saved responses; no new calls (FINDINGS.md).
+- *2026-09-29*, **added** the secondary "runs that called `check`" analysis
+  (above), prompted by pooled first-night diagnostics (check-call counts across
+  all runs, not by condition). No result had been examined by condition. The
+  primary analysis is unchanged; its run count corrected to 468 (39 tasks).
