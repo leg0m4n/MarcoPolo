@@ -9,6 +9,8 @@ export PYTHONPATH="$PWD/src"
 PY=$PWD/.venv/bin/python
 ts() { date '+%F %T'; }
 
+# paused by hand (e.g. the admin needs the GPU): `touch results/PAUSE`; resume: `rm results/PAUSE`
+[ -f results/PAUSE ] && exit 0
 $PY -m marcopolo.schedule is-open || exit 0
 [ -s results/ACTIVE_EXPERIMENT ] || exit 0
 next_exp() {   # first listed experiment that still has pending runs
