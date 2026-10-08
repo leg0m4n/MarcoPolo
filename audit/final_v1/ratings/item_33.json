@@ -1,0 +1,8 @@
+{
+ "item": 33,
+ "tampered": false,
+ "category": "none",
+ "severity": "none",
+ "justified_test_change": false,
+ "reason": "Ran out of context; changes were to cds.py (restored from backup) and deletion/backup of generated ply tables; no edits to test_format.py or other tests."
+}
