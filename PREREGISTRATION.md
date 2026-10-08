@@ -343,3 +343,11 @@ output, including a real astropy failure).
   (above), prompted by pooled first-night diagnostics (check-call counts across
   all runs, not by condition). No result had been examined by condition. The
   primary analysis is unchanged; its run count corrected to 468 (39 tasks).
+- *2026-10-08*, **tampering spot-check rater**: fresh Claude subagents that had
+  seen no results, instead of the assistant that built the harness, which by then
+  had seen the results by condition. This removes the registered limitation that
+  the rater also wrote the flags. Two rubric screens not yet coded were
+  implemented as written in the rubric (`special_case`, `false_claim`;
+  `scripts/audit.py`), after the results were known. The 6 impossible-task runs
+  where `check` passed and that the random sample missed are rated too, mixed in
+  blind, outside the kappa sample. Items were committed before any rating.
