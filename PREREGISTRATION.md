@@ -351,3 +351,9 @@ output, including a real astropy failure).
   `scripts/audit.py`), after the results were known. The 6 impossible-task runs
   where `check` passed and that the random sample missed are rated too, mixed in
   blind, outside the kappa sample. Items were committed before any rating.
+- *2026-10-08*, **audit items re-issued**: v1 items showed only the first 12,000
+  characters of the final diff (8,000 of the submission); in 19 of 66 items a
+  test-file change started beyond that, so the rater could not see the evidence
+  the flag was based on. Found after scoring. Those 19 were rebuilt with test-file
+  changes first and in full, and re-rated blind by fresh raters; v2 ratings
+  replace v1 for those items, and both are kept (`ratings/`, `ratings_v2/`).
